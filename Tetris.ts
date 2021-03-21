@@ -1,9 +1,10 @@
 const CELL = { EMPTY: 0, O_PIECE: 1 , I_PIECE: 2, J_PIECE: 3, L_PIECE: 4, S_PIECE: 5, Z_PIECE: 6, T_PIECE: 7}; // stores all the arbitrary piece values
 const COLOURSCHEME = ["#000000", "#ffe100", "#00eeff", "#0000b5", "#de7e00", "#51cb39", "#cd3300", "#y8315c8"]; // stores the colour scheme
+const shape = { O_PIECE: [{x:1, y:1}, {x:2, y:1}, {x:2, y:2}, {x:1, y:2}] , I_PIECE: [{x:2, y:0}, {x:2, y:1}, {x:2, y:2}, {x:2, y:3}], J_PIECE: [{x:2, y:0}, {x:2, y:1}, {x:2, y:2}, {x:1, y:2}], L_PIECE: [{x:1, y:0}, {x:1, y:1}, {x:1, y:2}, {x:2, y:2}], S_PIECE: [{x:1, y:1}, {x:1, y:2}, {x:2, y:2}, {x:2, y:3}], Z_PIECE: [{x:2, y:1}, {x:1, y:2}, {x:2, y:2}, {x:1, y:3}], T_PIECE: [{x:1, y:2}, {x:2, y:2}, {x:2, y:3}, {x:3, y:2}]};
 let CANVAS = document.getElementById("board");
 let c = CANVAS.getContext("2d");
 
-type piece ={
+type piece = {
   colour: string;
   shape: complex[];
 }
@@ -19,30 +20,30 @@ type GameState = {
 
 //complex number
 type complex = {
-  Re: number; // real part
-  Im: number; // imaginary part
+  x: number; // real part
+  y: number; // imaginary part
 } // complex number
 
 type GameBoard = number[][];
 
 // adds two complex numbers
 const add = (n1: complex) => (n2: complex):complex => ({
-  Re: n1.Re + n2.Re,
+  x: n1.x + n2.x,
 
-  Im: n1.Re + n2.Re
+  y: n1.x + n2.x
 }); 
 
 // multiplies two complex numbers -> This is the expanded form of (a+bi)(c+di)
 const multiply = (n1: complex) => (n2: complex):complex => ({
-  Re: ((n1.Re * n2.Re) - (n1.Im * n2.Im)),
+  x: ((n1.x * n2.x) - (n1.y * n2.y)),
 
-  Im: ((n1.Im * n2.Re) + (n1.Re * n2.Im))
+  y: ((n1.y * n2.x) + (n1.x * n2.y))
 }); 
 
 // takes an angle in radians and returns the complex unit vector in that angle
 const cis = (angle: number):complex => ({
-  Re: Math.cos(angle),
-  Im: Math.sin(angle)
+  x: Math.cos(angle),
+  y: Math.sin(angle)
 }); 
 
 // rotates by whatever angle given (in radians) 
@@ -50,10 +51,10 @@ const rotate = (angle: number) => (point: complex):complex => multiply(cis(angle
 
 // draw square
 const drawSquare =  (position: position) => (colour: string):void => {
-  const HEIGHT = CANVAS.clientHeight/20:
+  const HEIGHT = CANVAS.clientHeight/20;
   const WIDTH = CANVAS.clientWidth/10;
   c.fillStyle = colour; 
-  c.fillRect(position.x * WIDTH, position.y * HEIGHT, WIDTH, HEIGHT);
+  c.fillxct(position.x * WIDTH, position.y * HEIGHT, WIDTH, HEIGHT);
 };
 
 // returns a game board of specified size with each value being an empty cell
