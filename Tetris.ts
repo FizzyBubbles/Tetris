@@ -19,8 +19,14 @@ type piece = {
 }
 
 type GameState = {
-  Board: number[][];
+  piece: piece;
+  pos: complex;
 };
+
+type Input = {
+  rotation: Transformation;
+  translation: Transformation;
+}
 
 type Transformation = (position:complex) => complex;
 
@@ -31,6 +37,8 @@ type complex = {
 } // complex number
 
 type GameBoard = number[][];
+
+const ID = <A>(a: A): A => a;
 
 // adds two complex numbers
 const add = (n1: complex) => (n2: complex):complex => ({
@@ -56,6 +64,7 @@ const cis = (angle: number):complex => ({
 const rotate = (angle: number) => (position: complex):complex => multiply(cis(angle))(position); 
 
 const rotateClockwise: Transformation = rotate(-Math.PI / 2);
+const down: Transformation = add({x:0, y:1});
 
 // draw square
 const drawSquare = (colour: string) => (position: complex):void => {
@@ -96,4 +105,29 @@ const updatePiece = (piece: piece) => (transformation: Transformation):piece => 
   {colour: piece.colour, shape: piece.shape.map(transformation)}
   );
 
-drawPiece(PIECE.I_PIECE)({x:4, y:4})
+var gameState:GameState = { piece: PIECE.S_PIECE, pos: {x:4, y: 4} };
+
+const update = (input: Input) => (gameState:GameState):void => {
+  gameState.piece = updatePiece(gameState.piece)(input.rotation);
+  gameState.pos = input.translation(gameState.pos);
+  drawPiece(gameState.piece)(gameState.pos);
+}
+
+const draw = (gameState:GameState):void => {
+  
+}
+
+var oop = 0;
+
+const loop = (timestamp: number) => {
+  oop = oop + 1;
+  console.log(oop)
+
+  if (oop == 60) {
+    update({rotation: ID, translation: down})(gameState);
+    oop = 0;
+  };
+  window.requestAnimationFrame(loop);
+};
+
+window.requestAnimationFrame(loop);
