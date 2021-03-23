@@ -83,7 +83,15 @@ const PIECE = {
 		]
 	}
 };
-const KeyBindings = {left: 85, right: 48, rotateClockwise: 70, rotateAnticlockwise: 83, softDrop: 57, hardDrop: 32, hold: 68};
+const KeyBindings = {
+	left: 85,
+	right: 48,
+	rotateClockwise: 70,
+	rotateAntiClockwise: 83,
+	softDrop: 57,
+	hardDrop: 32,
+	hold: 68
+};
 
 let CANVAS = document.getElementById("board");
 let c = CANVAS.getContext("2d");
@@ -141,7 +149,10 @@ const rotate = (angle: number) => (position: complex): complex =>
 	multiply(cis(angle))(position);
 
 const rotateClockwise: Transformation = rotate(-Math.PI / 2);
+const rotateAntiClockwise: Transformation = rotate(Math.PI / 2);
 const down: Transformation = add({ x: 0, y: 1 });
+const left: Transformation = add({ x: -1, y: 0 });
+const right: Transformation = add({ x: 1, y: 0 });
 
 // draw square
 const drawSquare = (colour: string) => (position: complex): void => {
@@ -225,8 +236,18 @@ const loop = (timestamp: number) => {
 window.requestAnimationFrame(loop);
 
 document.onkeydown = function(e) {
-  switch (e) {
-    case 
-  }
-	update({ rotation: rotateClockwise, translation: ID })(gameState);
+	switch (e.which) {
+		case KeyBindings.left:
+			update({ rotation: ID, translation: left })(gameState);
+			break;
+		case KeyBindings.right:
+			update({ rotation: ID, translation: right })(gameState);
+			break;
+		case KeyBindings.rotateClockwise:
+			update({ rotation: rotateClockwise, translation: ID })(gameState);
+			break;
+		case KeyBindings.rotateAntiClockwise:
+			update({ rotation: rotateAntiClockwise, translation: ID })(gameState);
+			break;
+	}
 };
