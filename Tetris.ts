@@ -83,6 +83,7 @@ const PIECE = {
 		]
 	}
 };
+const KeyBindings = {left: 85, right: 48, rotateClockwise: 70, rotateAnticlockwise: 83, softDrop: 57, hardDrop: 32, hold: 68};
 
 let CANVAS = document.getElementById("board");
 let c = CANVAS.getContext("2d");
