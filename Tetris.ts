@@ -1,176 +1,15 @@
-const CELL = {
-	EMPTY: 0,
-	O_PIECE: 1,
-	I_PIECE: 2,
-	J_PIECE: 3,
-	L_PIECE: 4,
-	S_PIECE: 5,
-	Z_PIECE: 6,
-	T_PIECE: 7
-}; // stores all the arbitrary piece values
-const COLOURSCHEME = [
-	"#000000",
-	"#ffe100",
-	"#00eeff",
-	"#0000b5",
-	"#de7e00",
-	"#51cb39",
-	"#cd3300",
-	"#y8315c8"
-]; // stores the colour scheme
-const PIECE = {
-	O_PIECE: {
-		colour: COLOURSCHEME[1],
-		shape: [
-			{ x: 1, y: 1 },
-			{ x: 2, y: 1 },
-			{ x: 2, y: 2 },
-			{ x: 1, y: 2 }
-		]
-	},
-	I_PIECE: {
-		colour: COLOURSCHEME[2],
-		shape: [
-			{ x: 2, y: 0 },
-			{ x: 2, y: 1 },
-			{ x: 2, y: 2 },
-			{ x: 2, y: 3 }
-		]
-	},
-	J_PIECE: {
-		colour: COLOURSCHEME[3],
-		shape: [
-			{ x: 2, y: 0 },
-			{ x: 2, y: 1 },
-			{ x: 2, y: 2 },
-			{ x: 1, y: 2 }
-		]
-	},
-	L_PIECE: {
-		colour: COLOURSCHEME[4],
-		shape: [
-			{ x: 1, y: 0 },
-			{ x: 1, y: 1 },
-			{ x: 1, y: 2 },
-			{ x: 2, y: 2 }
-		]
-	},
-	S_PIECE: {
-		colour: COLOURSCHEME[5],
-		shape: [
-			{ x: 1, y: 1 },
-			{ x: 1, y: 2 },
-			{ x: 2, y: 2 },
-			{ x: 2, y: 3 }
-		]
-	},
-	Z_PIECE: {
-		colour: COLOURSCHEME[6],
-		shape: [
-			{ x: 2, y: 1 },
-			{ x: 1, y: 2 },
-			{ x: 2, y: 2 },
-			{ x: 1, y: 3 }
-		]
-	},
-	T_PIECE: {
-		colour: COLOURSCHEME[7],
-		shape: [
-			{ x: 1, y: 2 },
-			{ x: 2, y: 2 },
-			{ x: 2, y: 3 },
-			{ x: 3, y: 2 }
-		]
-	}
-};
-const KeyBindings = {
-	left: 85,
-	right: 48,
-	rotateClockwise: 70,
-	rotateAntiClockwise: 83,
-	softDrop: 57,
-	hardDrop: 32,
-	hold: 68
-};
-
-let CANVAS = document.getElementById("board");
-let c = CANVAS.getContext("2d");
-
-type piece = {
-	colour: string;
-	shape: complex[];
-};
-
-type GameState = {
-	piece: piece;
-	pos: complex;
-	board: GameBoard;
-};
-
-type Input = {
-	rotation: Transformation;
-	translation: Transformation;
-};
-
-type Transformation = (position: complex) => complex;
-
-//complex number
-type complex = {
-	x: number; // real part
-	y: number; // imaginary part
-}; // complex number
-
-type GameBoard = number[][];
-
-const ID = <A>(a: A): A => a;
-
-// adds two complex numbers
-const add = (n1: complex) => (n2: complex): complex => ({
-	x: n1.x + n2.x,
-
-	y: n1.y + n2.y
-});
-
-// multiplies two complex numbers -> This is the expanded form of (a+bi)(c+di)
-const multiply = (n1: complex) => (n2: complex): complex => ({
-	x: n1.x * n2.x - n1.y * n2.y,
-
-	y: n1.y * n2.x + n1.x * n2.y
-});
-
-// takes an angle in radians and returns the complex unit vector in that angle
-const cis = (angle: number): complex => ({
-	x: Math.cos(angle),
-	y: Math.sin(angle)
-});
-
-// rotates by whatever angle given (in radians)
-const rotate = (angle: number) => (position: complex): complex =>
-	multiply(cis(angle))(position);
-
-const rotateClockwise: Transformation = rotate(-Math.PI / 2);
-const rotateAntiClockwise: Transformation = rotate(Math.PI / 2);
-const down: Transformation = add({ x: 0, y: 1 });
-const left: Transformation = add({ x: -1, y: 0 });
-const right: Transformation = add({ x: 1, y: 0 });
-
-// draw square
-const drawSquare = (colour: string) => (position: complex): void => {
-	const HEIGHT = CANVAS.clientHeight / 20;
-	const WIDTH = CANVAS.clientWidth / 10;
-	c.fillStyle = colour;
-	c.fillRect(position.x * WIDTH, position.y * HEIGHT, WIDTH, HEIGHT);
-};
-
-// draws a specified piece at a given position
-const drawPiece = (piece: piece) => (position: complex): void => {
-	const colourSquare = drawSquare(piece.colour); // returns a function that draws a square with the colour of the piece
-	const displace = add(position); // returns a function which displaces the piece by the position
-
-	piece.shape.forEach(cell => {
-		colourSquare(displace(cell));
-	}); // draws each cell in its location
-};
+import { cloneDeep } from "lodash";
+import { pieces, CELL, COLOURSCHEME, PIECE, KeyBindings } from "./constants";
+import { add, multiply, cis, rotate, ID } from "./complex";
+import {
+	Complex,
+	Piece,
+	GameState,
+	Input,
+	Transformation,
+	GameBoard
+} from "./types";
+import { drawSquare, drawPiece, c, CANVAS } from "./drawUtils";
 
 // returns a game board of specified size with each value being an empty cell
 const newGameBoard = (rows: number) => (columns: number): GameBoard => {
@@ -188,31 +27,101 @@ const newGameBoard = (rows: number) => (columns: number): GameBoard => {
 	return constructedBoard;
 };
 
-const updatePiece = (piece: piece) => (
+const updatePiece = (piece: Piece) => (
 	transformation: Transformation
-): piece => ({ colour: piece.colour, shape: piece.shape.map(transformation) });
+): Piece => ({
+	id: piece.id,
+	colour: piece.colour,
+	shape: piece.shape.map(transformation)
+});
 
-var gameState: GameState = {
-	piece: PIECE.S_PIECE,
-	pos: { x: 4, y: 4 },
+// checks if two pieces have collided
+const squareCollision = (position1: Complex) => (position2: Complex) => {
+	const HEIGHT = CANVAS.clientHeight / 20;
+	const WIDTH = CANVAS.clientWidth / 10;
+	return (
+		position1.x < position2.x + WIDTH &&
+		position1.x + WIDTH > position2.x &&
+		position1.y < position2.y + HEIGHT &&
+		position1.y + HEIGHT > position2.y
+	);
+};
+
+const relativePos = (piece: Piece) => (position: Complex) =>
+	piece.shape.map(blockPosition => add(blockPosition)(position));
+
+const collisionDetection = (gameState: GameState) => {
+	const pieceLocation = relativePos(gameState.piece)(gameState.pos);
+	for (let i = 0; i < pieceLocation.length; i++) {
+		if (pieceLocation[i].x >= 0 && pieceLocation[i].y >= 0) {
+			if (
+				gameState.board[Math.trunc(pieceLocation[i].y)][
+					Math.trunc(pieceLocation[i].x)
+				]
+			) {
+				return true;
+			}
+		}
+	}
+	return false;
+};
+
+// whole game state
+var GAMESTATE: GameState = {
+	piece: PIECE.L_PIECE,
+	pos: { x: 4, y: 0 },
 	board: newGameBoard(10)(20)
 };
-gameState.piece.shape = gameState.piece.shape.map(add({ x: -2, y: -2 }));
+GAMESTATE.board[19] = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
 
 const drawGrid = (grid: GameBoard): void => {
 	// goes through each element of the grid and draws the respective cell.
-	grid.forEach((row, i) =>
+	grid.forEach((
+		row,
+		i // for each row
+	) =>
 		row.forEach((cell, j) => {
-			console.log(cell);
+			// for each cell within the row
+			// console.log(cell);
 			drawSquare(COLOURSCHEME[cell])({ x: j, y: i });
 		})
 	);
 };
 
+const addPieceToGrid = (gameState: GameState): GameState => {
+	let GS = Object.assign({}, gameState);
+	relativePos(GS.piece)(GS.pos).forEach(element => {
+		GS.board[Math.trunc(element.y)][Math.trunc(element.x)] = GS.piece.id;
+	});
+	return GS;
+};
+
+// updates GameState
 const update = (input: Input) => (gameState: GameState): void => {
-	console.log(updatePiece(gameState.piece)(input.rotation), gameState);
-	gameState.piece = updatePiece(gameState.piece)(input.rotation);
-	gameState.pos = input.translation(gameState.pos);
+	//console.log(updatePiece(gameState.piece)(input.rotation), gameState);
+	// let GS: GameState = Object.assign({}, gameState); // temporarily stores the next game state.
+
+	let GS: GameState = cloneDeep(gameState); // temporarily stores the next game state.
+	GS.piece = updatePiece(gameState.piece)(input.rotation);
+	GS.pos = input.translation(gameState.pos);
+	if (collisionDetection(GS)) {
+		GS = Object.assign({}, addPieceToGrid(gameState));
+
+		const randPiece: Piece =
+			PIECE[pieces[Math.floor(Math.random() * pieces.length)]];
+
+		gameState.piece = {
+			shape: randPiece.shape.map(add({ x: -1.5, y: -1.5 })),
+			id: randPiece.id,
+			colour: randPiece.colour
+		};
+
+		gameState.pos = { x: 3.5, y: 0.5 };
+		console.log(GS, gameState);
+	} else {
+		gameState = Object.assign({}, GS);
+	}
+	GAMESTATE = gameState;
 	draw(gameState);
 };
 
@@ -226,8 +135,10 @@ var oop = 0;
 
 const loop = (timestamp: number) => {
 	oop = oop + 1;
-	if (oop == 60) {
-		update({ rotation: ID, translation: down })(gameState);
+	if (oop >= 10 && go) {
+		update({ rotation: ID, translation: down })(
+			Object.assign({}, Object.assign({}, GAMESTATE))
+		);
 		oop = 0;
 	}
 	window.requestAnimationFrame(loop);
@@ -235,19 +146,81 @@ const loop = (timestamp: number) => {
 
 window.requestAnimationFrame(loop);
 
-document.onkeydown = function(e) {
+// key press handling
+const rotateClockwise: Transformation = multiply({ x: 0, y: 1 }); // TODO: fix
+const rotateAntiClockwise: Transformation = multiply({ x: 0, y: -1 }); // TODO: fix
+const down: Transformation = add({ x: 0, y: 1 });
+const left: Transformation = add({ x: -1, y: 0 });
+const right: Transformation = add({ x: 1, y: 0 });
+
+var go = true;
+
+type GameAction =
+	| "MOVE-LEFT"
+	| "MOVE-RIGHT"
+	| "MOVE-DOWN"
+	| "ROTATE-CLOCKWISE"
+	| "ROTATE-ANTICLOCKWISE"
+	| "CLOCK-TICK";
+
+// const tetrisReducer = (state: GameState, action: GameAction): GameState => {
+const tetrisReducer = (state: GameState, action: GameAction): GameState => {
+	switch (action) {
+		case "MOVE-LEFT":
+			return {
+				pos: updatePiece(state.piece)(left),
+				...state
+			};
+		case "MOVE-RIGHT":
+			return {
+				pos: updatePiece(state.piece)(right),
+				...state
+			};
+		case "MOVE-DOWN":
+			return {
+				pos: updatePiece(state.piece)(left),
+				...state
+			};
+		case "ROTATE-ANTICLOCKWISE":
+			return {
+				pos: updatePiece(state.piece)(left),
+				...state
+			};
+		case "ROTATE-CLOCKWISE":
+			return {
+				pos: updatePiece(state.piece)(left),
+				...state
+			};
+		case "CLOCK-TICK":
+			return {
+				pos: updatePiece(state.piece)(down),
+				...state
+			};
+	}
+};
+
+document.onkeydown = e => {
 	switch (e.which) {
 		case KeyBindings.left:
-			update({ rotation: ID, translation: left })(gameState);
+			update({ rotation: ID, translation: left })(Object.assign({}, GAMESTATE));
 			break;
 		case KeyBindings.right:
-			update({ rotation: ID, translation: right })(gameState);
+			update({ rotation: ID, translation: right })(
+				Object.assign({}, GAMESTATE)
+			);
 			break;
 		case KeyBindings.rotateClockwise:
-			update({ rotation: rotateClockwise, translation: ID })(gameState);
+			update({ rotation: rotateClockwise, translation: ID })(
+				Object.assign({}, GAMESTATE)
+			);
 			break;
 		case KeyBindings.rotateAntiClockwise:
-			update({ rotation: rotateAntiClockwise, translation: ID })(gameState);
+			update({ rotation: rotateAntiClockwise, translation: ID })(
+				Object.assign({}, GAMESTATE)
+			);
+			break;
+		case KeyBindings.hold:
+			go = !go;
 			break;
 	}
 };
