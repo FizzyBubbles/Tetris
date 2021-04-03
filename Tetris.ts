@@ -1,5 +1,12 @@
 import { cloneDeep } from "lodash";
-import { pieces, CELL, COLOURSCHEME, PIECE, KeyBindings } from "./constants";
+import {
+	pieces,
+	CELL,
+	COLOURSCHEME,
+	PIECE,
+	KeyBindings,
+	STARTINGPOS
+} from "./constants";
 import { add, multiply, cis, rotate, ID } from "./complex";
 import {
 	Complex,
@@ -10,6 +17,7 @@ import {
 	GameBoard
 } from "./types";
 import { drawSquare, drawPiece, c, CANVAS } from "./drawUtils";
+import { collisionDetection, addPieceToGrid } from "./collision";
 
 // returns a game board of specified size with each value being an empty cell
 const newGameBoard = (rows: number) => (columns: number): GameBoard => {
@@ -27,124 +35,16 @@ const newGameBoard = (rows: number) => (columns: number): GameBoard => {
 	return constructedBoard;
 };
 
-const updatePiece = (piece: Piece) => (
-	transformation: Transformation
-): Piece => ({
-	id: piece.id,
-	colour: piece.colour,
-	shape: piece.shape.map(transformation)
-});
-
-// checks if two pieces have collided
-const squareCollision = (position1: Complex) => (position2: Complex) => {
-	const HEIGHT = CANVAS.clientHeight / 20;
-	const WIDTH = CANVAS.clientWidth / 10;
-	return (
-		position1.x < position2.x + WIDTH &&
-		position1.x + WIDTH > position2.x &&
-		position1.y < position2.y + HEIGHT &&
-		position1.y + HEIGHT > position2.y
-	);
-};
-
-const relativePos = (piece: Piece) => (position: Complex) =>
-	piece.shape.map(blockPosition => add(blockPosition)(position));
-
-const collisionDetection = (gameState: GameState) => {
-	const pieceLocation = relativePos(gameState.piece)(gameState.pos);
-	for (let i = 0; i < pieceLocation.length; i++) {
-		if (pieceLocation[i].x >= 0 && pieceLocation[i].y >= 0) {
-			if (
-				gameState.board[Math.trunc(pieceLocation[i].y)][
-					Math.trunc(pieceLocation[i].x)
-				]
-			) {
-				return true;
-			}
-		}
-	}
-	return false;
-};
-
 // whole game state
 var GAMESTATE: GameState = {
 	piece: PIECE.L_PIECE,
-	pos: { x: 4, y: 0 },
+	pos: { x: 3.5, y: 1.5 },
 	board: newGameBoard(10)(20)
 };
 GAMESTATE.board[19] = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
 
-const drawGrid = (grid: GameBoard): void => {
-	// goes through each element of the grid and draws the respective cell.
-	grid.forEach((
-		row,
-		i // for each row
-	) =>
-		row.forEach((cell, j) => {
-			// for each cell within the row
-			// console.log(cell);
-			drawSquare(COLOURSCHEME[cell])({ x: j, y: i });
-		})
-	);
-};
-
-const addPieceToGrid = (gameState: GameState): GameState => {
-	let GS = Object.assign({}, gameState);
-	relativePos(GS.piece)(GS.pos).forEach(element => {
-		GS.board[Math.trunc(element.y)][Math.trunc(element.x)] = GS.piece.id;
-	});
-	return GS;
-};
-
-// updates GameState
-const update = (input: Input) => (gameState: GameState): void => {
-	//console.log(updatePiece(gameState.piece)(input.rotation), gameState);
-	// let GS: GameState = Object.assign({}, gameState); // temporarily stores the next game state.
-
-	let GS: GameState = cloneDeep(gameState); // temporarily stores the next game state.
-	GS.piece = updatePiece(gameState.piece)(input.rotation);
-	GS.pos = input.translation(gameState.pos);
-	if (collisionDetection(GS)) {
-		GS = Object.assign({}, addPieceToGrid(gameState));
-
-		const randPiece: Piece =
-			PIECE[pieces[Math.floor(Math.random() * pieces.length)]];
-
-		gameState.piece = {
-			shape: randPiece.shape.map(add({ x: -1.5, y: -1.5 })),
-			id: randPiece.id,
-			colour: randPiece.colour
-		};
-
-		gameState.pos = { x: 3.5, y: 0.5 };
-		console.log(GS, gameState);
-	} else {
-		gameState = Object.assign({}, GS);
-	}
-	GAMESTATE = gameState;
-	draw(gameState);
-};
-
-// handles drawing on the canvas
-const draw = (gameState: GameState): void => {
-	drawGrid(gameState.board);
-	drawPiece(gameState.piece)(gameState.pos);
-};
-
-var oop = 0;
-
-const loop = (timestamp: number) => {
-	oop = oop + 1;
-	if (oop >= 10 && go) {
-		update({ rotation: ID, translation: down })(
-			Object.assign({}, Object.assign({}, GAMESTATE))
-		);
-		oop = 0;
-	}
-	window.requestAnimationFrame(loop);
-};
-
-window.requestAnimationFrame(loop);
+const randomPiece = (): Piece =>
+	PIECE[pieces[Math.trunc(Math.random() * pieces.length)]];
 
 // key press handling
 const rotateClockwise: Transformation = multiply({ x: 0, y: 1 }); // TODO: fix
@@ -168,59 +68,183 @@ const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 	switch (action) {
 		case "MOVE-LEFT":
 			return {
-				pos: updatePiece(state.piece)(left),
-				...state
+				...state,
+				pos: left(state.pos)
 			};
 		case "MOVE-RIGHT":
 			return {
-				pos: updatePiece(state.piece)(right),
-				...state
+				...state,
+				pos: right(state.pos)
 			};
-		case "MOVE-DOWN":
-			return {
-				pos: updatePiece(state.piece)(left),
-				...state
-			};
+		case "MOVE-DOWN": {
+			const newState = { ...state, pos: down(state.pos) };
+			return collisionDetection(newState) ? addPieceToGrid(state) : newState;
+		}
 		case "ROTATE-ANTICLOCKWISE":
 			return {
-				pos: updatePiece(state.piece)(left),
-				...state
+				...state,
+				piece: updatePiece(state.piece)(rotateAntiClockwise)
 			};
 		case "ROTATE-CLOCKWISE":
 			return {
-				pos: updatePiece(state.piece)(left),
-				...state
+				...state,
+				piece: updatePiece(state.piece)(rotateClockwise)
 			};
-		case "CLOCK-TICK":
-			return {
-				pos: updatePiece(state.piece)(down),
-				...state
-			};
+		case "CLOCK-TICK": {
+			const newState = { ...state, pos: down(state.pos) };
+			if (collisionDetection(newState)) {
+				return {
+					...addPieceToGrid(state),
+					pos: STARTINGPOS,
+					piece: randomPiece()
+				};
+			}
+			return newState;
+			//return collisionDetection(newState) ? addPieceToGrid(state) : newState;
+		}
 	}
 };
+
+const makeStore = <State, Action>(
+	reducer: (state: State, action: Action) => State,
+	initialState: State
+): {
+	state: State;
+	dispatch: (action: Action) => void;
+	subscribe: (listener: (state: State) => void) => void;
+} => {
+	let state = initialState;
+	let listeners: ((state: State) => void)[] = [];
+
+	const subscribe = (listener: (state: State) => void) => {
+		listeners = [...listeners, listener];
+	};
+	const dispatch = (action: Action) => {
+		// console.log("dispatched action", action);
+		const newState = reducer(state, action);
+		state = newState;
+		listeners.forEach(listener => listener(state));
+	};
+
+	return { state, dispatch, subscribe };
+};
+
+const tetrisStore = makeStore(tetrisReducer, GAMESTATE);
+
+const updatePiece = (piece: Piece) => (
+	transformation: Transformation
+): Piece => ({
+	id: piece.id,
+	colour: piece.colour,
+	shape: piece.shape.map(transformation)
+});
+
+const drawGrid = (grid: GameBoard): void => {
+	// goes through each element of the grid and draws the respective cell.
+	grid.forEach((
+		row,
+		i // for each row
+	) =>
+		row.forEach((cell, j) => {
+			// for each cell within the row
+			// console.log(cell);
+			drawSquare(COLOURSCHEME[cell])({ x: j, y: i });
+		})
+	);
+};
+
+// updates GameState
+// const update = (input: Input) => (gameState: GameState): void => {
+// 	//console.log(updatePiece(gameState.piece)(input.rotation), gameState);
+// 	// let GS: GameState = Object.assign({}, gameState); // temporarily stores the next game state.
+
+// 	let GS: GameState = cloneDeep(gameState); // temporarily stores the next game state.
+// 	GS.piece = updatePiece(gameState.piece)(input.rotation);
+// 	GS.pos = input.translation(gameState.pos);
+// 	if (collisionDetection(GS)) {
+// 		GS = Object.assign({}, addPieceToGrid(gameState));
+
+// 		const randPiece: Piece =
+// 			PIECE[pieces[Math.floor(Math.random() * pieces.length)]];
+
+// 		gameState.piece = {
+// 			shape: randPiece.shape.map(add({ x: -1.5, y: -1.5 })),
+// 			id: randPiece.id,
+// 			colour: randPiece.colour
+// 		};
+
+// 		gameState.pos = { x: 3.5, y: 0.5 };
+// 		console.log(GS, gameState);
+// 	} else {
+// 		gameState = Object.assign({}, GS);
+// 	}
+// 	GAMESTATE = gameState;
+// 	draw(gameState);
+// };
+
+const main = () => {
+	const drawState = (tetrisState: GameState) => {
+		draw(tetrisState);
+	};
+
+	// tetrisSubscribe(drawState);
+	tetrisStore.subscribe(drawState);
+	// tetrisSubscribe(tetrisState => {
+	// 	console.log("subscribe", tetrisState);
+	// 	draw(tetrisState);
+	// });
+};
+
+// handles drawing on the canvas
+const draw = (gameState: GameState): void => {
+	drawGrid(gameState.board);
+	drawPiece(gameState.piece)(gameState.pos);
+};
+
+var oop = 0;
+
+const loop = (timestamp: number) => {
+	oop = oop + 1;
+	if (oop >= 10 && go) {
+		// update({ rotation: ID, translation: down })(
+		// 	Object.assign({}, Object.assign({}, GAMESTATE))
+		// );
+		tetrisStore.dispatch("CLOCK-TICK");
+		oop = 0;
+	}
+	window.requestAnimationFrame(loop);
+};
+
+window.requestAnimationFrame(loop);
 
 document.onkeydown = e => {
 	switch (e.which) {
 		case KeyBindings.left:
-			update({ rotation: ID, translation: left })(Object.assign({}, GAMESTATE));
+			// update({ rotation: ID, translation: left })(Object.assign({}, GAMESTATE));
+			tetrisStore.dispatch("MOVE-LEFT");
 			break;
 		case KeyBindings.right:
-			update({ rotation: ID, translation: right })(
-				Object.assign({}, GAMESTATE)
-			);
+			// update({ rotation: ID, translation: right })(
+			// Object.assign({}, GAMESTATE)
+			// );
+			tetrisStore.dispatch("MOVE-RIGHT");
 			break;
 		case KeyBindings.rotateClockwise:
-			update({ rotation: rotateClockwise, translation: ID })(
-				Object.assign({}, GAMESTATE)
-			);
+			// update({ rotation: rotateClockwise, translation: ID })(
+			// Object.assign({}, GAMESTATE)
+			// );
+			tetrisStore.dispatch("ROTATE-CLOCKWISE");
 			break;
 		case KeyBindings.rotateAntiClockwise:
-			update({ rotation: rotateAntiClockwise, translation: ID })(
-				Object.assign({}, GAMESTATE)
-			);
+			// update({ rotation: rotateAntiClockwise, translation: ID })(
+			// Object.assign({}, GAMESTATE)
+			// );
+			tetrisStore.dispatch("ROTATE-ANTICLOCKWISE");
 			break;
 		case KeyBindings.hold:
 			go = !go;
 			break;
 	}
 };
+
+main();

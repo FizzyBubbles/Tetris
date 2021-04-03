@@ -35,70 +35,70 @@ export const PIECE = {
 		id: 1,
 		colour: COLOURSCHEME[1],
 		shape: [
-			{ x: 1, y: 1 },
-			{ x: 2, y: 1 },
-			{ x: 2, y: 2 },
-			{ x: 1, y: 2 }
+			{ x: -0.5, y: -0.5 },
+			{ x: 0.5, y: -0.5 },
+			{ x: 0.5, y: 0.5 },
+			{ x: -0.5, y: 0.5 }
 		]
 	},
 	I_PIECE: {
 		id: 2,
 		colour: COLOURSCHEME[2],
 		shape: [
-			{ x: 2, y: 0 },
-			{ x: 2, y: 1 },
-			{ x: 2, y: 2 },
-			{ x: 2, y: 3 }
+			{ x: 0.5, y: -1.5 },
+			{ x: 0.5, y: -0.5 },
+			{ x: 0.5, y: 0.5 },
+			{ x: 0.5, y: 1.5 }
 		]
 	},
 	J_PIECE: {
 		id: 3,
 		colour: COLOURSCHEME[3],
 		shape: [
-			{ x: 2, y: 0 },
-			{ x: 2, y: 1 },
-			{ x: 2, y: 2 },
-			{ x: 1, y: 2 }
+			{ x: 0.5, y: -1.5 },
+			{ x: 0.5, y: -0.5 },
+			{ x: 0.5, y: 0.5 },
+			{ x: -0.5, y: 0.5 }
 		]
 	},
 	L_PIECE: {
 		id: 4,
 		colour: COLOURSCHEME[4],
 		shape: [
-			{ x: 1, y: 0 },
-			{ x: 1, y: 1 },
-			{ x: 1, y: 2 },
-			{ x: 2, y: 2 }
+			{ x: -0.5, y: -1.5 },
+			{ x: -0.5, y: -0.5 },
+			{ x: -0.5, y: 0.5 },
+			{ x: 0.5, y: 0.5 }
 		]
 	},
 	S_PIECE: {
 		id: 5,
 		colour: COLOURSCHEME[5],
 		shape: [
-			{ x: 1, y: 1 },
-			{ x: 1, y: 2 },
-			{ x: 2, y: 2 },
-			{ x: 2, y: 3 }
+			{ x: -0.5, y: -0.5 },
+			{ x: -0.5, y: 0.5 },
+			{ x: 0.5, y: 0.5 },
+			{ x: 0.5, y: 1.5 }
 		]
 	},
 	Z_PIECE: {
 		id: 6,
 		colour: COLOURSCHEME[6],
 		shape: [
-			{ x: 2, y: 1 },
-			{ x: 1, y: 2 },
-			{ x: 2, y: 2 },
-			{ x: 1, y: 3 }
+			{ x: 0.5, y: -0.5 },
+			{ x: -0.5, y: 0.5 },
+			{ x: 0.5, y: 0.5 },
+			{ x: -0.5, y: 1.5 }
 		]
 	},
 	T_PIECE: {
 		id: 7,
 		colour: COLOURSCHEME[7],
 		shape: [
-			{ x: 1, y: 2 },
-			{ x: 2, y: 2 },
-			{ x: 2, y: 3 },
-			{ x: 3, y: 2 }
+			{ x: -0.5, y: 0.5 },
+			{ x: 0.5, y: 0.5 },
+			{ x: 0.5, y: 1.5 },
+			{ x: 1.5, y: 0.5 }
 		]
 	}
 };
@@ -112,3 +112,5 @@ export const KeyBindings = {
 	hardDrop: 32,
 	hold: 68
 };
+
+export const STARTINGPOS = { x: 3.5, y: 0.5 };
