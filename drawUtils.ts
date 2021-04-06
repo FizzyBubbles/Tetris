@@ -1,11 +1,12 @@
 import { Piece, Complex } from "./types";
 import { add } from "./complex";
 
-export let CANVAS = document.getElementById("board");
+export let CANVAS = document.getElementById("board") as HTMLCanvasElement;
 export let c = CANVAS.getContext("2d");
 
 // draw square
 export const drawSquare = (colour: string) => (position: Complex): void => {
+	if (!c) return;
 	const HEIGHT = CANVAS.clientHeight / 20;
 	const WIDTH = CANVAS.clientWidth / 10;
 	c.fillStyle = colour;

@@ -63,7 +63,6 @@ type GameAction =
 	| "ROTATE-ANTICLOCKWISE"
 	| "CLOCK-TICK";
 
-// const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 	switch (action) {
 		case "MOVE-LEFT":

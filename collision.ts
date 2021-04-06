@@ -1,10 +1,10 @@
 import { Complex, Piece, GameState, GameBoard } from "./types";
-import { CANVAS, drawSquare } from "./drawUtils";
-import { COLOURSCHEME } from "./constants";
+import { CANVAS } from "./drawUtils";
 import { add } from "./complex";
 
 // checks if two pieces have collided
 export const squareCollision = (position1: Complex) => (position2: Complex) => {
+	if (!CANVAS) return;
 	const HEIGHT = CANVAS.clientHeight / 20;
 	const WIDTH = CANVAS.clientWidth / 10;
 	return (
