@@ -17,7 +17,7 @@ import {
 	GameBoard
 } from "./types";
 import { drawSquare, drawPiece, c, CANVAS } from "./drawUtils";
-import { collisionDetection, addPieceToGrid } from "./collision";
+import { pieceCollided, addPieceToGrid } from "./collision";
 
 // returns a game board of specified size with each value being an empty cell
 const newGameBoard = (rows: number) => (columns: number): GameBoard => {
@@ -41,7 +41,6 @@ var GAMESTATE: GameState = {
 	pos: { x: 3.5, y: 1.5 },
 	board: newGameBoard(10)(20)
 };
-GAMESTATE.board[19] = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
 
 const randomPiece = (): Piece =>
 	PIECE[pieces[Math.trunc(Math.random() * pieces.length)]];
@@ -65,33 +64,41 @@ type GameAction =
 
 const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 	switch (action) {
-		case "MOVE-LEFT":
-			return {
-				...state,
-				pos: left(state.pos)
-			};
-		case "MOVE-RIGHT":
-			return {
-				...state,
-				pos: right(state.pos)
-			};
+		case "MOVE-LEFT": {
+			const newState = { ...state, pos: left(state.pos) };
+			return pieceCollided(newState) ? state : newState;
+		}
+		case "MOVE-RIGHT": {
+			const newState = { ...state, pos: right(state.pos) };
+			return pieceCollided(newState) ? state : newState;
+		}
 		case "MOVE-DOWN": {
 			const newState = { ...state, pos: down(state.pos) };
-			return collisionDetection(newState) ? addPieceToGrid(state) : newState;
+			if (pieceCollided(newState)) {
+				return {
+					...addPieceToGrid(state),
+					pos: STARTINGPOS,
+					piece: randomPiece()
+				};
+			}
 		}
-		case "ROTATE-ANTICLOCKWISE":
-			return {
+		case "ROTATE-ANTICLOCKWISE": {
+			const newState = {
 				...state,
 				piece: updatePiece(state.piece)(rotateAntiClockwise)
 			};
-		case "ROTATE-CLOCKWISE":
-			return {
+			return pieceCollided(newState) ? state : newState;
+		}
+		case "ROTATE-CLOCKWISE": {
+			const newState = {
 				...state,
 				piece: updatePiece(state.piece)(rotateClockwise)
 			};
+			return pieceCollided(newState) ? state : newState;
+		}
 		case "CLOCK-TICK": {
 			const newState = { ...state, pos: down(state.pos) };
-			if (collisionDetection(newState)) {
+			if (pieceCollided(newState)) {
 				return {
 					...addPieceToGrid(state),
 					pos: STARTINGPOS,

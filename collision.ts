@@ -16,22 +16,31 @@ export const squareCollision = (position1: Complex) => (position2: Complex) => {
 };
 
 export const relativePos = (piece: Piece) => (position: Complex) =>
-	piece.shape.map(blockPosition => add(blockPosition)(position));
+	piece.shape.map(blockPosition => add(blockPosition)(position)); // returns the position of all the blocks in a piece plus the position.
 
-export const collisionDetection = (gameState: GameState) => {
+export const pieceCollided = (gameState: GameState) => {
 	const pieceLocation = relativePos(gameState.piece)(gameState.pos);
+	let collided = false;
 	for (let i = 0; i < pieceLocation.length; i++) {
-		if (pieceLocation[i].x >= 0 && pieceLocation[i].y >= 0) {
+		// console.log("x: " + pieceLocation[i].x, "y: " + pieceLocation[i].y);
+		if (
+			pieceLocation[i].x < 0 || // checks if piece location is left of the boundary
+			pieceLocation[i].x >= 10 || // checks if piece location to the right of the boundary
+			pieceLocation[i].y >= 20 // checks if piece location is above the bottom
+		) {
+			collided = true;
+		} else if (pieceLocation[i].y >= 0) {
+			// checks if piece location is lower than the top )
 			if (
 				gameState.board[Math.trunc(pieceLocation[i].y)][
 					Math.trunc(pieceLocation[i].x)
 				]
 			) {
-				return true;
+				collided = true;
 			}
 		}
 	}
-	return false;
+	return collided;
 };
 
 export const addPieceToGrid = (gameState: GameState): GameState => {
