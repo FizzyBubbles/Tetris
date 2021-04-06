@@ -219,25 +219,15 @@ window.requestAnimationFrame(loop);
 document.onkeydown = e => {
 	switch (e.which) {
 		case KeyBindings.left:
-			// update({ rotation: ID, translation: left })(Object.assign({}, GAMESTATE));
 			tetrisStore.dispatch("MOVE-LEFT");
 			break;
 		case KeyBindings.right:
-			// update({ rotation: ID, translation: right })(
-			// Object.assign({}, GAMESTATE)
-			// );
 			tetrisStore.dispatch("MOVE-RIGHT");
 			break;
 		case KeyBindings.rotateClockwise:
-			// update({ rotation: rotateClockwise, translation: ID })(
-			// Object.assign({}, GAMESTATE)
-			// );
 			tetrisStore.dispatch("ROTATE-CLOCKWISE");
 			break;
 		case KeyBindings.rotateAntiClockwise:
-			// update({ rotation: rotateAntiClockwise, translation: ID })(
-			// Object.assign({}, GAMESTATE)
-			// );
 			tetrisStore.dispatch("ROTATE-ANTICLOCKWISE");
 			break;
 		case KeyBindings.hold:
