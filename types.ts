@@ -11,6 +11,7 @@ export type Piece = {
 };
 
 export type GameState = {
+	score: number;
 	piece: Piece;
 	pos: Complex;
 	board: GameBoard;

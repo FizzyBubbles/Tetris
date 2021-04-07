@@ -25,6 +25,7 @@ import {
 	clearFullRows,
 	emptyRow
 } from "./collision";
+import { stat } from "fs";
 
 // returns a game board of specified size with each value being an empty cell
 const newGameBoard = (rows: number) => (columns: number): GameBoard => {
@@ -47,6 +48,7 @@ const newGameBoard = (rows: number) => (columns: number): GameBoard => {
 
 // whole game state
 var GAMESTATE: GameState = {
+	score: 0,
 	piece: PIECE.L_PIECE,
 	pos: { x: 3.5, y: 1.5 },
 	board: newGameBoard(10)(20)
@@ -107,9 +109,11 @@ const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 			return pieceCollided(newState) ? state : newState;
 		}
 		case "CLOCK-TICK": {
+			console.log(state.score);
 			const newState = { ...state, pos: down(state.pos) };
 			if (pieceCollided(newState)) {
 				return {
+					score: state.score + 1,
 					board: clearFullRows(addPieceToGrid(state).board),
 					pos: STARTINGPOS,
 					piece: randomPiece()
