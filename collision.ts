@@ -1,6 +1,10 @@
 import { Complex, Piece, GameState, GameBoard } from "./types";
 import { CANVAS } from "./drawUtils";
 import { add } from "./complex";
+import { CELL } from "./constants";
+import { arrayExpression } from "@babel/types";
+import { Z_FILTERED } from "zlib";
+import { cloneDeep } from "lodash";
 
 // checks if two pieces have collided
 export const squareCollision = (position1: Complex) => (position2: Complex) => {
@@ -41,6 +45,39 @@ export const pieceCollided = (gameState: GameState) => {
 		}
 	}
 	return collided;
+};
+
+export const emptyRow = (length: number) => {
+	let row: number[] = [];
+	for (let i = 0; i < length; i++) {
+		row = [...row, CELL.EMPTY];
+	}
+	return row;
+};
+// Array(length).fill(CELL.EMPTY);
+// creates empty row
+// concat
+export const fullRows = (board: GameBoard): boolean[] =>
+	board.map(row => rowIsFull(row));
+
+export const rowIsFull = (row: number[]): boolean => !row.includes(CELL.EMPTY);
+
+export const clearLine = (board: GameBoard) => (
+	rowIndex: number
+): GameBoard => [
+	board.slice(rowIndex, rowIndex + 1).map(() => 0),
+	...board.slice(0, rowIndex),
+	...board.slice(rowIndex + 1)
+];
+
+export const clearFullRows = (board: GameBoard): GameBoard => {
+	const numberOfRows = board.length;
+	const filteredBoard = board.filter(row => row.includes(CELL.EMPTY));
+	console.log(board);
+	return [
+		...Array(numberOfRows - filteredBoard.length).fill(emptyRow(10)),
+		...filteredBoard
+	];
 };
 
 export const addPieceToGrid = (gameState: GameState): GameState => {

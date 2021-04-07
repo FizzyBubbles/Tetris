@@ -17,7 +17,14 @@ import {
 	GameBoard
 } from "./types";
 import { drawSquare, drawPiece, c, CANVAS } from "./drawUtils";
-import { pieceCollided, addPieceToGrid } from "./collision";
+import {
+	pieceCollided,
+	addPieceToGrid,
+	fullRows,
+	clearLine,
+	clearFullRows,
+	emptyRow
+} from "./collision";
 
 // returns a game board of specified size with each value being an empty cell
 const newGameBoard = (rows: number) => (columns: number): GameBoard => {
@@ -34,6 +41,9 @@ const newGameBoard = (rows: number) => (columns: number): GameBoard => {
 	}
 	return constructedBoard;
 };
+
+// const newGameBoard = (rowLength: number) => (columns: number): GameBoard =>
+// 	Array(columns).fill(emptyRow(rowLength)); // TODO: describe this (lol this just does everything that happens in the other function)
 
 // whole game state
 var GAMESTATE: GameState = {
@@ -100,7 +110,7 @@ const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 			const newState = { ...state, pos: down(state.pos) };
 			if (pieceCollided(newState)) {
 				return {
-					...addPieceToGrid(state),
+					board: clearFullRows(addPieceToGrid(state).board),
 					pos: STARTINGPOS,
 					piece: randomPiece()
 				};
@@ -192,6 +202,13 @@ const main = () => {
 	const drawState = (tetrisState: GameState) => {
 		draw(tetrisState);
 	};
+
+	console.log(
+		clearFullRows([
+			...Array(19).fill(Array(10).fill(CELL.EMPTY)),
+			Array(10).fill(1)
+		])
+	);
 
 	// tetrisSubscribe(drawState);
 	tetrisStore.subscribe(drawState);
