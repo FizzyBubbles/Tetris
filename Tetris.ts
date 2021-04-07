@@ -24,12 +24,16 @@ import {
 	clearLine,
 	clearFullRows,
 	emptyRow,
-	newGameBoard
+	newGameBoard,
+	numFullRows
 } from "./collision";
 import { stat } from "fs";
+import { calculateLevel, calculateScore } from "./scoring";
 
 // whole game state
 var GAMESTATE: GameState = {
+	cummulativeLineClears: 10,
+	level: 0,
 	score: 0,
 	piece: PIECE.L_PIECE,
 	pos: { x: 3.5, y: 1.5 },
@@ -91,15 +95,24 @@ const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 			return pieceCollided(newState) ? state : newState;
 		}
 		case "CLOCK-TICK": {
-			console.log(state.score);
 			const newState = { ...state, pos: down(state.pos) };
 			if (pieceCollided(newState)) {
-				return {
-					score: state.score + 1,
+				const numLinesCleared = numFullRows(addPieceToGrid(state).board);
+				const nextState = {
+					cummulativeLineClears: state.cummulativeLineClears + numLinesCleared,
+					level: calculateLevel(state.cummulativeLineClears),
+					score: state.score + calculateScore(numLinesCleared)(state.level),
 					board: clearFullRows(addPieceToGrid(state).board),
 					pos: STARTINGPOS,
 					piece: randomPiece()
 				};
+				console.log("Current Score: ", nextState.score);
+				console.log("Current Level: ", nextState.level);
+				console.log(
+					"Cummulative Line Clears: ",
+					nextState.cummulativeLineClears
+				);
+				return nextState;
 			}
 			return newState;
 			//return collisionDetection(newState) ? addPieceToGrid(state) : newState;

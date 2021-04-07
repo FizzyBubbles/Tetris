@@ -100,6 +100,12 @@ export const clearFullRows = (board: GameBoard): GameBoard => {
 	];
 };
 
+export const numFullRows = (board: GameBoard) =>
+	fullRows(board).reduce(
+		(accumulator, currentValue) => accumulator + currentValue,
+		0
+	);
+
 export const addPieceToGrid = (gameState: GameState): GameState => {
 	let GS = Object.assign({}, gameState);
 	relativePos(GS.piece)(GS.pos).forEach(element => {

@@ -11,6 +11,7 @@ export type Piece = {
 };
 
 export type GameState = {
+	cummulativeLineClears: number;
 	level: number;
 	score: number;
 	piece: Piece;
