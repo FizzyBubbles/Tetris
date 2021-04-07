@@ -23,28 +23,10 @@ import {
 	fullRows,
 	clearLine,
 	clearFullRows,
-	emptyRow
+	emptyRow,
+	newGameBoard
 } from "./collision";
 import { stat } from "fs";
-
-// returns a game board of specified size with each value being an empty cell
-const newGameBoard = (rows: number) => (columns: number): GameBoard => {
-	let constructedBoard: GameBoard = [];
-	for (let col = 0; col < columns; col++) {
-		// loops through the columns and pushes the rows of empty cells into the 2d array game board
-		let constructedRow = [];
-		for (let row = 0; row < rows; row++) {
-			// creates rows of empty cells at a specified length
-			constructedRow.push(CELL.EMPTY);
-		}
-		// pushes the constructed row into the game board
-		constructedBoard.push(constructedRow);
-	}
-	return constructedBoard;
-};
-
-// const newGameBoard = (rowLength: number) => (columns: number): GameBoard =>
-// 	Array(columns).fill(emptyRow(rowLength)); // TODO: describe this (lol this just does everything that happens in the other function)
 
 // whole game state
 var GAMESTATE: GameState = {
