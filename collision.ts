@@ -73,7 +73,6 @@ export const clearLine = (board: GameBoard) => (
 export const clearFullRows = (board: GameBoard): GameBoard => {
 	const numberOfRows = board.length;
 	const filteredBoard = board.filter(row => row.includes(CELL.EMPTY));
-	console.log(board);
 	return [
 		...Array(numberOfRows - filteredBoard.length).fill(emptyRow(10)),
 		...filteredBoard
