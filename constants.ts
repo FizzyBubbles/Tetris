@@ -1,5 +1,6 @@
 import { newGameBoard } from "./collision";
 import { GameState } from "./types";
+import { randomPiece } from "./Tetris";
 
 export const KeyBindings = {
 	left: 85,
@@ -48,83 +49,90 @@ export const PIECE = {
 	O_PIECE: {
 		id: 1,
 		colour: COLOURSCHEME[1],
+		rotationalCentre: { x: 0.5, y: 0.5 },
 		shape: [
-			{ x: -0.5, y: -0.5 },
-			{ x: 0.5, y: -0.5 },
-			{ x: 0.5, y: 0.5 },
-			{ x: -0.5, y: 0.5 }
+			{ x: 0, y: 0 },
+			{ x: 0, y: 1 },
+			{ x: 1, y: 0 },
+			{ x: 1, y: 1 }
 		]
 	},
 	I_PIECE: {
 		id: 2,
 		colour: COLOURSCHEME[2],
+		rotationalCentre: { x: 1.5, y: 0.5 },
 		shape: [
-			{ x: 0.5, y: -1.5 },
-			{ x: 0.5, y: -0.5 },
-			{ x: 0.5, y: 0.5 },
-			{ x: 0.5, y: 1.5 }
+			{ x: 0, y: 0 },
+			{ x: 1, y: 0 },
+			{ x: 2, y: 0 },
+			{ x: 3, y: 0 }
 		]
 	},
 	J_PIECE: {
 		id: 3,
 		colour: COLOURSCHEME[3],
+		rotationalCentre: { x: 1, y: 0 },
 		shape: [
-			{ x: 0.5, y: -1.5 },
-			{ x: 0.5, y: -0.5 },
-			{ x: 0.5, y: 0.5 },
-			{ x: -0.5, y: 0.5 }
+			{ x: 0, y: 1 },
+			{ x: 0, y: 0 },
+			{ x: 1, y: 0 },
+			{ x: 2, y: 0 }
 		]
 	},
 	L_PIECE: {
 		id: 4,
 		colour: COLOURSCHEME[4],
+		rotationalCentre: { x: 1, y: 0 },
 		shape: [
-			{ x: -0.5, y: -1.5 },
-			{ x: -0.5, y: -0.5 },
-			{ x: -0.5, y: 0.5 },
-			{ x: 0.5, y: 0.5 }
+			{ x: 0, y: 0 },
+			{ x: 1, y: 0 },
+			{ x: 2, y: 0 },
+			{ x: 2, y: 1 }
 		]
 	},
 	S_PIECE: {
 		id: 5,
 		colour: COLOURSCHEME[5],
+		rotationalCentre: { x: 1, y: 0 },
 		shape: [
-			{ x: -0.5, y: -0.5 },
-			{ x: -0.5, y: 0.5 },
-			{ x: 0.5, y: 0.5 },
-			{ x: 0.5, y: 1.5 }
+			{ x: 0, y: 0 },
+			{ x: 1, y: 0 },
+			{ x: 1, y: 1 },
+			{ x: 2, y: 1 }
 		]
 	},
 	Z_PIECE: {
 		id: 6,
 		colour: COLOURSCHEME[6],
+		rotationalCentre: { x: 1, y: 0 },
 		shape: [
-			{ x: 0.5, y: -0.5 },
-			{ x: -0.5, y: 0.5 },
-			{ x: 0.5, y: 0.5 },
-			{ x: -0.5, y: 1.5 }
+			{ x: 0, y: 1 },
+			{ x: 1, y: 1 },
+			{ x: 1, y: 0 },
+			{ x: 2, y: 0 }
 		]
 	},
 	T_PIECE: {
 		id: 7,
 		colour: COLOURSCHEME[7],
+		rotationalCentre: { x: 1, y: 0 },
 		shape: [
-			{ x: -0.5, y: 0.5 },
-			{ x: 0.5, y: 0.5 },
-			{ x: 0.5, y: 1.5 },
-			{ x: 1.5, y: 0.5 }
+			{ x: 0, y: 0 },
+			{ x: 1, y: 0 },
+			{ x: 1, y: 1 },
+			{ x: 2, y: 0 }
 		]
 	}
 };
 
-export const STARTINGPOS = { x: 3.5, y: -0.5 };
+export const STARTINGPOS = { x: 3, y: 0 };
 
 // whole game state
 export const NewGameState: GameState = {
 	cummulativeLineClears: 10,
 	level: 0,
 	score: 0,
-	piece: PIECE.L_PIECE,
+	piece: PIECE.I_PIECE,
 	pos: STARTINGPOS,
 	board: newGameBoard(10)(20)
 };

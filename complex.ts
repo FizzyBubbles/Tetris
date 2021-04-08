@@ -1,10 +1,20 @@
 import { Complex } from "./types";
+import diff from "jest-diff";
 
 // adds two complex numbers
 export const add = (n1: Complex) => (n2: Complex): Complex => ({
 	x: n1.x + n2.x,
 
 	y: n1.y + n2.y
+});
+
+// stubtracts a number from another
+export const subtract = (difference: Complex) => (
+	number: Complex
+): Complex => ({
+	x: number.x - difference.x,
+
+	y: number.y - difference.y
 });
 
 // multiplies two complex numbers -> This is the expanded form of (a+bi)(c+di)

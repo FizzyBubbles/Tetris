@@ -8,7 +8,7 @@ import {
 	STARTINGPOS,
 	NewGameState
 } from "./constants";
-import { add, multiply, cis, rotate, ID } from "./complex";
+import { add, multiply, cis, rotate, ID, subtract } from "./complex";
 import {
 	Complex,
 	Piece,
@@ -109,13 +109,17 @@ const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 					return resetGameState();
 				}
 				const numLinesCleared = numFullRows(addPieceToGrid(state).board);
+				const nextPiece = randomPiece();
 				const nextState = {
 					cummulativeLineClears: state.cummulativeLineClears + numLinesCleared,
 					level: calculateLevel(state.cummulativeLineClears),
 					score: state.score + calculateScore(numLinesCleared)(state.level),
 					board: clearFullRows(addPieceToGrid(state).board),
-					pos: STARTINGPOS,
-					piece: randomPiece()
+					pos: add(nextPiece.rotationalCentre)(STARTINGPOS),
+					piece: {
+						...nextPiece,
+						shape: nextPiece.shape.map(subtract(nextPiece.rotationalCentre))
+					}
 				};
 				console.log("Current Score: ", nextState.score);
 				console.log("Current Level: ", nextState.level);
@@ -164,8 +168,7 @@ const tetrisStore = makeStore(tetrisReducer, resetGameState());
 const updatePiece = (piece: Piece) => (
 	transformation: Transformation
 ): Piece => ({
-	id: piece.id,
-	colour: piece.colour,
+	...piece,
 	shape: piece.shape.map(transformation)
 });
 

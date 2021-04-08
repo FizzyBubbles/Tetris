@@ -8,6 +8,7 @@ export type Piece = {
 	id: number;
 	colour: string;
 	shape: Complex[];
+	rotationalCentre: Complex;
 };
 
 export type GameState = {

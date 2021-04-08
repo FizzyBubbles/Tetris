@@ -14,6 +14,15 @@ export const drawSquare = (colour: string) => (position: Complex): void => {
 	c.fillRect(position.x * WIDTH, position.y * HEIGHT, WIDTH, HEIGHT);
 };
 
+const drawPoint = (colour: string) => (position: Complex): void => {
+	if (!c) return;
+	const HEIGHT = CANVAS.clientHeight / 20;
+	const WIDTH = CANVAS.clientWidth / 10;
+	c.fillStyle = colour;
+	c.fillRect(position.x * WIDTH, position.y * HEIGHT, 5, 5);
+	console.log("bruh");
+};
+
 // draws a specified piece at a given position
 export const drawPiece = (piece: Piece) => (position: Complex): void => {
 	const colourSquare = drawSquare(piece.colour); // returns a function that draws a square with the colour of the piece
@@ -22,6 +31,8 @@ export const drawPiece = (piece: Piece) => (position: Complex): void => {
 	piece.shape.forEach(cell => {
 		colourSquare(displace(cell));
 	}); // draws each cell in its location
+
+	drawPoint("b")(position);
 };
 
 export const drawGrid = (grid: GameBoard): void => {
