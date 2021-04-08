@@ -1,5 +1,6 @@
-import { Piece, Complex } from "./types";
+import { Piece, Complex, GameBoard } from "./types";
 import { add } from "./complex";
+import { COLOURSCHEME } from "./constants";
 
 export let CANVAS = document.getElementById("board") as HTMLCanvasElement;
 export let c = CANVAS.getContext("2d");
@@ -21,4 +22,18 @@ export const drawPiece = (piece: Piece) => (position: Complex): void => {
 	piece.shape.forEach(cell => {
 		colourSquare(displace(cell));
 	}); // draws each cell in its location
+};
+
+export const drawGrid = (grid: GameBoard): void => {
+	// goes through each element of the grid and draws the respective cell.
+	grid.forEach((
+		row,
+		i // for each row
+	) =>
+		row.forEach((cell, j) => {
+			// for each cell within the row
+			// console.log(cell);
+			drawSquare(COLOURSCHEME[cell])({ x: j, y: i });
+		})
+	);
 };

@@ -1,3 +1,17 @@
+import { newGameBoard } from "./collision";
+import { GameState } from "./types";
+
+export const KeyBindings = {
+	left: 85,
+	right: 48,
+	rotateClockwise: 70,
+	rotateAntiClockwise: 83,
+	softDrop: 57,
+	hardDrop: 32,
+	hold: 68,
+	reset: 82
+};
+
 export const pieces: string[] = [
 	"O_PIECE",
 	"I_PIECE",
@@ -103,14 +117,14 @@ export const PIECE = {
 	}
 };
 
-export const KeyBindings = {
-	left: 85,
-	right: 48,
-	rotateClockwise: 70,
-	rotateAntiClockwise: 83,
-	softDrop: 57,
-	hardDrop: 32,
-	hold: 68
-};
-
 export const STARTINGPOS = { x: 3.5, y: 0.5 };
+
+// whole game state
+export const NewGameState: GameState = {
+	cummulativeLineClears: 10,
+	level: 0,
+	score: 0,
+	piece: PIECE.L_PIECE,
+	pos: { x: 3.5, y: 1.5 },
+	board: newGameBoard(10)(20)
+};

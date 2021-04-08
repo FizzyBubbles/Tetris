@@ -5,7 +5,8 @@ import {
 	COLOURSCHEME,
 	PIECE,
 	KeyBindings,
-	STARTINGPOS
+	STARTINGPOS,
+	NewGameState
 } from "./constants";
 import { add, multiply, cis, rotate, ID } from "./complex";
 import {
@@ -16,7 +17,7 @@ import {
 	Transformation,
 	GameBoard
 } from "./types";
-import { drawSquare, drawPiece, c, CANVAS } from "./drawUtils";
+import { drawSquare, drawPiece, c, CANVAS, drawGrid } from "./drawUtils";
 import {
 	pieceCollided,
 	addPieceToGrid,
@@ -30,15 +31,7 @@ import {
 import { stat } from "fs";
 import { calculateLevel, calculateScore } from "./scoring";
 
-// whole game state
-var GAMESTATE: GameState = {
-	cummulativeLineClears: 10,
-	level: 0,
-	score: 0,
-	piece: PIECE.L_PIECE,
-	pos: { x: 3.5, y: 1.5 },
-	board: newGameBoard(10)(20)
-};
+const resetGameState = (): GameState => cloneDeep(NewGameState);
 
 const randomPiece = (): Piece =>
 	PIECE[pieces[Math.trunc(Math.random() * pieces.length)]];
@@ -58,7 +51,8 @@ type GameAction =
 	| "MOVE-DOWN"
 	| "ROTATE-CLOCKWISE"
 	| "ROTATE-ANTICLOCKWISE"
-	| "CLOCK-TICK";
+	| "CLOCK-TICK"
+	| "RESET";
 
 const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 	switch (action) {
@@ -125,10 +119,14 @@ const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 					"Cummulative Line Clears: ",
 					nextState.cummulativeLineClears
 				);
+				console.log(NewGameState);
 				return nextState;
 			}
 			return newState;
 			//return collisionDetection(newState) ? addPieceToGrid(state) : newState;
+		}
+		case "RESET": {
+			return resetGameState();
 		}
 	}
 };
@@ -157,7 +155,7 @@ const makeStore = <State, Action>(
 	return { state, dispatch, subscribe };
 };
 
-const tetrisStore = makeStore(tetrisReducer, GAMESTATE);
+const tetrisStore = makeStore(tetrisReducer, resetGameState());
 
 const updatePiece = (piece: Piece) => (
 	transformation: Transformation
@@ -166,20 +164,6 @@ const updatePiece = (piece: Piece) => (
 	colour: piece.colour,
 	shape: piece.shape.map(transformation)
 });
-
-const drawGrid = (grid: GameBoard): void => {
-	// goes through each element of the grid and draws the respective cell.
-	grid.forEach((
-		row,
-		i // for each row
-	) =>
-		row.forEach((cell, j) => {
-			// for each cell within the row
-			// console.log(cell);
-			drawSquare(COLOURSCHEME[cell])({ x: j, y: i });
-		})
-	);
-};
 
 // updates GameState
 // const update = (input: Input) => (gameState: GameState): void => {
@@ -263,6 +247,9 @@ document.onkeydown = e => {
 			break;
 		case KeyBindings.hold:
 			go = !go;
+			break;
+		case KeyBindings.reset:
+			tetrisStore.dispatch("RESET");
 			break;
 	}
 };
