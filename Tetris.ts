@@ -73,12 +73,25 @@ const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 		case "MOVE-DOWN": {
 			const newState = { ...state, pos: down(state.pos) };
 			if (pieceCollided(newState)) {
-				return {
-					...addPieceToGrid(state),
+				const numLinesCleared = numFullRows(addPieceToGrid(state).board);
+				const nextState = {
+					cummulativeLineClears: state.cummulativeLineClears + numLinesCleared,
+					level: calculateLevel(state.cummulativeLineClears),
+					score: state.score + calculateScore(numLinesCleared)(state.level),
+					board: clearFullRows(addPieceToGrid(state).board),
 					pos: STARTINGPOS,
 					piece: randomPiece()
 				};
+				console.log("Current Score: ", nextState.score);
+				console.log("Current Level: ", nextState.level);
+				console.log(
+					"Cummulative Line Clears: ",
+					nextState.cummulativeLineClears
+				);
+				return nextState;
 			}
+			return newState;
+			//return collisionDetection(newState) ? addPieceToGrid(state) : newState;}
 		}
 		case "ROTATE-ANTICLOCKWISE": {
 			const newState = {
@@ -201,14 +214,6 @@ const main = () => {
 	const drawState = (tetrisState: GameState) => {
 		draw(tetrisState);
 	};
-
-	console.log(
-		clearFullRows([
-			...Array(19).fill(Array(10).fill(CELL.EMPTY)),
-			Array(10).fill(1)
-		])
-	);
-
 	// tetrisSubscribe(drawState);
 	tetrisStore.subscribe(drawState);
 	// tetrisSubscribe(tetrisState => {
@@ -252,6 +257,9 @@ document.onkeydown = e => {
 			break;
 		case KeyBindings.rotateAntiClockwise:
 			tetrisStore.dispatch("ROTATE-ANTICLOCKWISE");
+			break;
+		case KeyBindings.softDrop:
+			tetrisStore.dispatch("MOVE-DOWN");
 			break;
 		case KeyBindings.hold:
 			go = !go;
