@@ -26,7 +26,8 @@ import {
 	clearFullRows,
 	emptyRow,
 	newGameBoard,
-	numFullRows
+	numFullRows,
+	failed
 } from "./collision";
 import { stat } from "fs";
 import { calculateLevel, calculateScore } from "./scoring";
@@ -104,6 +105,9 @@ const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 		case "CLOCK-TICK": {
 			const newState = { ...state, pos: down(state.pos) };
 			if (pieceCollided(newState)) {
+				if (failed(state)) {
+					return resetGameState();
+				}
 				const numLinesCleared = numFullRows(addPieceToGrid(state).board);
 				const nextState = {
 					cummulativeLineClears: state.cummulativeLineClears + numLinesCleared,

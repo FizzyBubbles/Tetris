@@ -27,6 +27,17 @@ export const newGameBoard = (rowLength: number) => (
 // const newGameBoard = (rowLength: number) => (columns: number): GameBoard =>
 // 	Array(columns).fill(emptyRow(rowLength)); // TODO: describe this (lol this just does everything that happens in the other function)
 
+export const failed = (gameState: GameState): boolean => {
+	const pieceLocation = relativePos(gameState.piece)(gameState.pos);
+	let failed = false;
+	for (let i = 0; i < pieceLocation.length; i++) {
+		if (pieceLocation[i].y < 0) {
+			failed = true;
+			i = pieceLocation.length;
+		}
+	}
+	return failed;
+};
 // checks if two pieces have collided
 export const squareCollision = (position1: Complex) => (position2: Complex) => {
 	if (!CANVAS) return;

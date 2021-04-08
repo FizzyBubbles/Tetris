@@ -117,7 +117,7 @@ export const PIECE = {
 	}
 };
 
-export const STARTINGPOS = { x: 3.5, y: 0.5 };
+export const STARTINGPOS = { x: 3.5, y: -0.5 };
 
 // whole game state
 export const NewGameState: GameState = {
@@ -125,6 +125,6 @@ export const NewGameState: GameState = {
 	level: 0,
 	score: 0,
 	piece: PIECE.L_PIECE,
-	pos: { x: 3.5, y: 1.5 },
+	pos: STARTINGPOS,
 	board: newGameBoard(10)(20)
 };
