@@ -1,8 +1,9 @@
 import { Piece } from "./types";
-import { pieces, PIECE } from "./constants";
+import { PIECES, PIECE } from "./constants";
+import { cloneDeep } from "lodash";
 
 export const randomPiece = (): Piece =>
-	pieces[Math.trunc(Math.random() * pieces.length)];
+	PIECES[Math.trunc(Math.random() * PIECES.length)];
 
 export const randomPieces = (numberOfRandomPieces: number): Piece[] => {
 	let output = [];
@@ -11,3 +12,8 @@ export const randomPieces = (numberOfRandomPieces: number): Piece[] => {
 	}
 	return output;
 };
+
+const shuffle = (pieces: Piece[]) =>
+	cloneDeep(pieces).sort(() => Math.random() - 0.5);
+
+export const randomBag = (): Piece[] => shuffle(PIECES);

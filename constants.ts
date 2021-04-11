@@ -122,7 +122,7 @@ export const PIECE = {
 	}
 };
 
-export const pieces: Piece[] = [
+export const PIECES: Piece[] = [
 	PIECE.I_PIECE,
 	PIECE.J_PIECE,
 	PIECE.L_PIECE,

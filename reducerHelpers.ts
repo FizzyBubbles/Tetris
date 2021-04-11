@@ -2,7 +2,7 @@ import { Transformation, GameState } from "./types";
 
 import { multiply, add, subtract } from "./complex";
 import { numFullRows, addPieceToGrid, clearFullRows } from "./collision";
-import { randomPiece } from "./random";
+import { randomPiece, randomBag } from "./random";
 import { calculateLevel, calculateScore } from "./scoring";
 import { STARTINGPOS } from "./constants";
 
@@ -16,14 +16,16 @@ export const right: Transformation = add({ x: 1, y: 0 });
 export const settlePiece = (state: GameState): GameState => {
 	const numLinesCleared = numFullRows(addPieceToGrid(state).board);
 	const nextPiece = state.queue[0];
-	console.log("nextPiece: ", nextPiece.name);
-	console.log(
-		"queue initial: ",
-		state.queue.map(e => e.name)
-	);
+	// console.log("nextPiece: ", nextPiece.name);
+	// console.log(
+	// 	"queue initial: ",
+	// 	state.queue.map(e => e.name)
+	// );
 	const nextState = {
-		//...state,
-		queue: [...state.queue.slice(1), randomPiece()],
+		queue:
+			state.queue.length <= 7
+				? [...state.queue.slice(1), ...randomBag()]
+				: state.queue.slice(1),
 		cummulativeLineClears: state.cummulativeLineClears + numLinesCleared,
 		level: calculateLevel(state.cummulativeLineClears),
 		score: state.score + calculateScore(numLinesCleared)(state.level),
@@ -34,10 +36,11 @@ export const settlePiece = (state: GameState): GameState => {
 			shape: nextPiece.shape.map(subtract(nextPiece.rotationalCentre))
 		}
 	};
-	console.log(
-		"queue next: ",
-		nextState.queue.map(e => e.name)
-	);
+
+	// console.log(
+	// 	"queue next: ",
+	// 	nextState.queue.map(e => e.name)
+	// );
 	// console.log("Current Score: ", nextState.score);
 	// console.log("Current Level: ", nextState.level);
 	// console.log(

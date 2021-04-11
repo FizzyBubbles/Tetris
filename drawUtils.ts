@@ -1,4 +1,4 @@
-import { Piece, Complex, GameBoard } from "./types";
+import { Piece, Complex, GameBoard, GameState } from "./types";
 import { add } from "./complex";
 import { COLOURSCHEME } from "./constants";
 
@@ -69,6 +69,14 @@ export const drawPieceQueue = (piece: Piece) => (position: Complex): void => {
 	}); // draws each cell in its location
 };
 
+export const clearQueue = (colour: string): void => {
+	if (!queueContext) return;
+	const HEIGHT = gameCanvas.clientHeight;
+	const WIDTH = gameCanvas.clientWidth;
+	queueContext.fillStyle = colour;
+	queueContext.fillRect(0, 0, WIDTH, HEIGHT);
+};
+
 export const drawGrid = (grid: GameBoard): void => {
 	// goes through each element of the grid and draws the respective cell.
 	grid.forEach((
@@ -81,4 +89,10 @@ export const drawGrid = (grid: GameBoard): void => {
 			drawSquareGameBoard(COLOURSCHEME[cell])({ x: j, y: i });
 		})
 	);
+};
+
+// handles drawing on the canvas
+export const draw = (gameState: GameState): void => {
+	drawGrid(gameState.board);
+	drawPieceGameBoard(gameState.piece)(gameState.pos);
 };

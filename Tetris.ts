@@ -1,6 +1,6 @@
 import { cloneDeep } from "lodash";
 import {
-	pieces,
+	PIECES,
 	CELL,
 	COLOURSCHEME,
 	PIECE,
@@ -22,7 +22,10 @@ import {
 	drawPieceGameBoard,
 	gameBoardContext,
 	gameCanvas,
-	drawGrid
+	drawGrid,
+	draw,
+	drawPieceQueue,
+	clearQueue
 } from "./drawUtils";
 import {
 	pieceCollided,
@@ -67,10 +70,12 @@ const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 			const newState = { ...state, pos: left(state.pos) };
 			return pieceCollided(newState) ? state : newState;
 		}
+
 		case "MOVE-RIGHT": {
 			const newState = { ...state, pos: right(state.pos) };
 			return pieceCollided(newState) ? state : newState;
 		}
+
 		case "MOVE-DOWN": {
 			const newState = { ...state, pos: down(state.pos) };
 			if (pieceCollided(newState)) {
@@ -80,8 +85,8 @@ const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 				return settlePiece(state);
 			}
 			return newState;
-			//return collisionDetection(newState) ? addPieceToGrid(state) : newState;}
 		}
+
 		case "ROTATE-ANTICLOCKWISE": {
 			const newState = {
 				...state,
@@ -89,6 +94,7 @@ const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 			};
 			return pieceCollided(newState) ? state : newState;
 		}
+
 		case "ROTATE-CLOCKWISE": {
 			const newState = {
 				...state,
@@ -96,6 +102,7 @@ const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 			};
 			return pieceCollided(newState) ? state : newState;
 		}
+
 		case "CLOCK-TICK": {
 			const newState = { ...state, pos: down(state.pos) };
 			if (pieceCollided(newState)) {
@@ -105,8 +112,8 @@ const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 				return settlePiece(state);
 			}
 			return newState;
-			//return collisionDetection(newState) ? addPieceToGrid(state) : newState;
 		}
+
 		case "RESET": {
 			return resetGameState();
 		}
@@ -146,35 +153,6 @@ const updatePiece = (piece: Piece) => (
 	shape: piece.shape.map(transformation)
 });
 
-// updates GameState
-// const update = (input: Input) => (gameState: GameState): void => {
-// 	//console.log(updatePiece(gameState.piece)(input.rotation), gameState);
-// 	// let GS: GameState = Object.assign({}, gameState); // temporarily stores the next game state.
-
-// 	let GS: GameState = cloneDeep(gameState); // temporarily stores the next game state.
-// 	GS.piece = updatePiece(gameState.piece)(input.rotation);
-// 	GS.pos = input.translation(gameState.pos);
-// 	if (collisionDetection(GS)) {
-// 		GS = Object.assign({}, addPieceToGrid(gameState));
-
-// 		const randPiece: Piece =
-// 			PIECE[pieces[Math.floor(Math.random() * pieces.length)]];
-
-// 		gameState.piece = {
-// 			shape: randPiece.shape.map(add({ x: -1.5, y: -1.5 })),
-// 			id: randPiece.id,
-// 			colour: randPiece.colour
-// 		};
-
-// 		gameState.pos = { x: 3.5, y: 0.5 };
-// 		console.log(GS, gameState);
-// 	} else {
-// 		gameState = Object.assign({}, GS);
-// 	}
-// 	GAMESTATE = gameState;
-// 	draw(gameState);
-// };
-
 const main = () => {
 	const drawState = (tetrisState: GameState) => {
 		draw(tetrisState);
@@ -189,22 +167,18 @@ const main = () => {
 		document.getElementById("linesCleared").innerHTML =
 			"Lines Cleared: " + gameState.cummulativeLineClears;
 	};
-	// tetrisSubscribe(drawState);
+	const drawQueue = (gameState: GameState): void => {
+		clearQueue(COLOURSCHEME[0]);
+		gameState.queue.forEach((p, i) =>
+			drawPieceQueue(p)({ x: 1, y: i * 3 + 2 })
+		);
+	};
+
 	tetrisStore.subscribe(writeScore);
 	tetrisStore.subscribe(writeLevel);
 	tetrisStore.subscribe(writeLinesCleared);
 	tetrisStore.subscribe(drawState);
-
-	// tetrisSubscribe(tetrisState => {
-	// 	console.log("subscribe", tetrisState);
-	// 	draw(tetrisState);
-	// });
-};
-
-// handles drawing on the canvas
-const draw = (gameState: GameState): void => {
-	drawGrid(gameState.board);
-	drawPieceGameBoard(gameState.piece)(gameState.pos);
+	tetrisStore.subscribe(drawQueue);
 };
 
 var oop = 0;
@@ -212,9 +186,6 @@ var oop = 0;
 const loop = (timestamp: number) => {
 	oop = oop + 1;
 	if (oop >= 10 && go) {
-		// update({ rotation: ID, translation: down })(
-		// 	Object.assign({}, Object.assign({}, GAMESTATE))
-		// );
 		tetrisStore.dispatch("CLOCK-TICK");
 		oop = 0;
 	}
@@ -250,3 +221,32 @@ document.onkeydown = e => {
 };
 
 main();
+
+// updates GameState
+// const update = (input: Input) => (gameState: GameState): void => {
+// 	//console.log(updatePiece(gameState.piece)(input.rotation), gameState);
+// 	// let GS: GameState = Object.assign({}, gameState); // temporarily stores the next game state.
+
+// 	let GS: GameState = cloneDeep(gameState); // temporarily stores the next game state.
+// 	GS.piece = updatePiece(gameState.piece)(input.rotation);
+// 	GS.pos = input.translation(gameState.pos);
+// 	if (collisionDetection(GS)) {
+// 		GS = Object.assign({}, addPieceToGrid(gameState));
+
+// 		const randPiece: Piece =
+// 			PIECE[pieces[Math.floor(Math.random() * pieces.length)]];
+
+// 		gameState.piece = {
+// 			shape: randPiece.shape.map(add({ x: -1.5, y: -1.5 })),
+// 			id: randPiece.id,
+// 			colour: randPiece.colour
+// 		};
+
+// 		gameState.pos = { x: 3.5, y: 0.5 };
+// 		console.log(GS, gameState);
+// 	} else {
+// 		gameState = Object.assign({}, GS);
+// 	}
+// 	GAMESTATE = gameState;
+// 	draw(gameState);
+// };
