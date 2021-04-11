@@ -76,29 +76,7 @@ const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 				if (failed(state)) {
 					return resetGameState();
 				}
-				const numLinesCleared = numFullRows(addPieceToGrid(state).board);
-				const nextPiece = state.queue[0];
-				console.log("nextPiece: ", nextPiece);
-				const nextState = {
-					//...state,
-					queue: [...state.queue.slice(1), randomPiece()],
-					cummulativeLineClears: state.cummulativeLineClears + numLinesCleared,
-					level: calculateLevel(state.cummulativeLineClears),
-					score: state.score + calculateScore(numLinesCleared)(state.level),
-					board: clearFullRows(addPieceToGrid(state).board),
-					pos: add(nextPiece.rotationalCentre)(STARTINGPOS),
-					piece: {
-						...nextPiece,
-						shape: nextPiece.shape.map(subtract(nextPiece.rotationalCentre))
-					}
-				};
-				// console.log("Current Score: ", nextState.score);
-				// console.log("Current Level: ", nextState.level);
-				// console.log(
-				// 	"Cummulative Line Clears: ",
-				// 	nextState.cummulativeLineClears
-				// );
-				return nextState;
+				return settlePiece(state);
 			}
 			return newState;
 			//return collisionDetection(newState) ? addPieceToGrid(state) : newState;}
@@ -123,37 +101,7 @@ const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 				if (failed(state)) {
 					return resetGameState();
 				}
-				const numLinesCleared = numFullRows(addPieceToGrid(state).board);
-				const nextPiece = state.queue[0];
-				console.log("nextPiece: ", nextPiece.name);
-				console.log(
-					"queue initial: ",
-					state.queue.map(e => e.name)
-				);
-				const nextState = {
-					//...state,
-					queue: [...state.queue.slice(1), randomPiece()],
-					cummulativeLineClears: state.cummulativeLineClears + numLinesCleared,
-					level: calculateLevel(state.cummulativeLineClears),
-					score: state.score + calculateScore(numLinesCleared)(state.level),
-					board: clearFullRows(addPieceToGrid(state).board),
-					pos: add(nextPiece.rotationalCentre)(STARTINGPOS),
-					piece: {
-						...nextPiece,
-						shape: nextPiece.shape.map(subtract(nextPiece.rotationalCentre))
-					}
-				};
-				console.log(
-					"queue next: ",
-					nextState.queue.map(e => e.name)
-				);
-				// console.log("Current Score: ", nextState.score);
-				// console.log("Current Level: ", nextState.level);
-				// console.log(
-				// 	"Cummulative Line Clears: ",
-				// 	nextState.cummulativeLineClears
-				// );
-				return nextState;
+				return settlePiece(state);
 			}
 			return newState;
 			//return collisionDetection(newState) ? addPieceToGrid(state) : newState;
@@ -196,6 +144,40 @@ const updatePiece = (piece: Piece) => (
 	...piece,
 	shape: piece.shape.map(transformation)
 });
+
+const settlePiece = (state: GameState): GameState => {
+	const numLinesCleared = numFullRows(addPieceToGrid(state).board);
+	const nextPiece = state.queue[0];
+	console.log("nextPiece: ", nextPiece.name);
+	console.log(
+		"queue initial: ",
+		state.queue.map(e => e.name)
+	);
+	const nextState = {
+		//...state,
+		queue: [...state.queue.slice(1), randomPiece()],
+		cummulativeLineClears: state.cummulativeLineClears + numLinesCleared,
+		level: calculateLevel(state.cummulativeLineClears),
+		score: state.score + calculateScore(numLinesCleared)(state.level),
+		board: clearFullRows(addPieceToGrid(state).board),
+		pos: add(nextPiece.rotationalCentre)(STARTINGPOS),
+		piece: {
+			...nextPiece,
+			shape: nextPiece.shape.map(subtract(nextPiece.rotationalCentre))
+		}
+	};
+	console.log(
+		"queue next: ",
+		nextState.queue.map(e => e.name)
+	);
+	// console.log("Current Score: ", nextState.score);
+	// console.log("Current Level: ", nextState.level);
+	// console.log(
+	// 	"Cummulative Line Clears: ",
+	// 	nextState.cummulativeLineClears
+	// );
+	return nextState;
+};
 
 // updates GameState
 // const update = (input: Input) => (gameState: GameState): void => {
