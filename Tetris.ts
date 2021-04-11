@@ -39,15 +39,16 @@ import { stat } from "fs";
 import { calculateLevel, calculateScore } from "./scoring";
 import { statement } from "@babel/template";
 import { randomPiece } from "./random";
+import {
+	left,
+	right,
+	down,
+	rotateAntiClockwise,
+	rotateClockwise,
+	settlePiece
+} from "./reducerHelpers";
 
 const resetGameState = (): GameState => cloneDeep(NewGameState);
-
-// key press handling
-const rotateClockwise: Transformation = multiply({ x: 0, y: 1 }); // TODO: fix
-const rotateAntiClockwise: Transformation = multiply({ x: 0, y: -1 }); // TODO: fix
-const down: Transformation = add({ x: 0, y: 1 });
-const left: Transformation = add({ x: -1, y: 0 });
-const right: Transformation = add({ x: 1, y: 0 });
 
 var go = true;
 
@@ -144,40 +145,6 @@ const updatePiece = (piece: Piece) => (
 	...piece,
 	shape: piece.shape.map(transformation)
 });
-
-const settlePiece = (state: GameState): GameState => {
-	const numLinesCleared = numFullRows(addPieceToGrid(state).board);
-	const nextPiece = state.queue[0];
-	console.log("nextPiece: ", nextPiece.name);
-	console.log(
-		"queue initial: ",
-		state.queue.map(e => e.name)
-	);
-	const nextState = {
-		//...state,
-		queue: [...state.queue.slice(1), randomPiece()],
-		cummulativeLineClears: state.cummulativeLineClears + numLinesCleared,
-		level: calculateLevel(state.cummulativeLineClears),
-		score: state.score + calculateScore(numLinesCleared)(state.level),
-		board: clearFullRows(addPieceToGrid(state).board),
-		pos: add(nextPiece.rotationalCentre)(STARTINGPOS),
-		piece: {
-			...nextPiece,
-			shape: nextPiece.shape.map(subtract(nextPiece.rotationalCentre))
-		}
-	};
-	console.log(
-		"queue next: ",
-		nextState.queue.map(e => e.name)
-	);
-	// console.log("Current Score: ", nextState.score);
-	// console.log("Current Level: ", nextState.level);
-	// console.log(
-	// 	"Cummulative Line Clears: ",
-	// 	nextState.cummulativeLineClears
-	// );
-	return nextState;
-};
 
 // updates GameState
 // const update = (input: Input) => (gameState: GameState): void => {
