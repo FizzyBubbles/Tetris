@@ -4,14 +4,25 @@ export type Complex = {
 	y: number; // imaginary part
 };
 
+export type PieceName =
+	| "O_PIECE"
+	| "I_PIECE"
+	| "J_PIECE"
+	| "L_PIECE"
+	| "S_PIECE"
+	| "Z_PIECE"
+	| "T_PIECE";
+
 export type Piece = {
 	id: number;
+	name: string;
 	colour: string;
 	shape: Complex[];
 	rotationalCentre: Complex;
 };
 
 export type GameState = {
+	queue: Piece[];
 	cummulativeLineClears: number;
 	level: number;
 	score: number;

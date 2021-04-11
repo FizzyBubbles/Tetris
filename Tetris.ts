@@ -12,12 +12,18 @@ import { add, multiply, cis, rotate, ID, subtract } from "./complex";
 import {
 	Complex,
 	Piece,
-	GameState,
 	Input,
 	Transformation,
-	GameBoard
+	GameBoard,
+	GameState
 } from "./types";
-import { drawSquare, drawPiece, c, CANVAS, drawGrid } from "./drawUtils";
+import {
+	drawSquareGameBoard,
+	drawPieceGameBoard,
+	gameBoardContext,
+	gameCanvas,
+	drawGrid
+} from "./drawUtils";
 import {
 	pieceCollided,
 	addPieceToGrid,
@@ -31,11 +37,10 @@ import {
 } from "./collision";
 import { stat } from "fs";
 import { calculateLevel, calculateScore } from "./scoring";
+import { statement } from "@babel/template";
+import { randomPiece } from "./random";
 
 const resetGameState = (): GameState => cloneDeep(NewGameState);
-
-const randomPiece = (): Piece =>
-	PIECE[pieces[Math.trunc(Math.random() * pieces.length)]];
 
 // key press handling
 const rotateClockwise: Transformation = multiply({ x: 0, y: 1 }); // TODO: fix
@@ -68,21 +73,31 @@ const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 		case "MOVE-DOWN": {
 			const newState = { ...state, pos: down(state.pos) };
 			if (pieceCollided(newState)) {
+				if (failed(state)) {
+					return resetGameState();
+				}
 				const numLinesCleared = numFullRows(addPieceToGrid(state).board);
+				const nextPiece = state.queue[0];
+				console.log("nextPiece: ", nextPiece);
 				const nextState = {
+					//...state,
+					queue: [...state.queue.slice(1), randomPiece()],
 					cummulativeLineClears: state.cummulativeLineClears + numLinesCleared,
 					level: calculateLevel(state.cummulativeLineClears),
 					score: state.score + calculateScore(numLinesCleared)(state.level),
 					board: clearFullRows(addPieceToGrid(state).board),
-					pos: STARTINGPOS,
-					piece: randomPiece()
+					pos: add(nextPiece.rotationalCentre)(STARTINGPOS),
+					piece: {
+						...nextPiece,
+						shape: nextPiece.shape.map(subtract(nextPiece.rotationalCentre))
+					}
 				};
-				console.log("Current Score: ", nextState.score);
-				console.log("Current Level: ", nextState.level);
-				console.log(
-					"Cummulative Line Clears: ",
-					nextState.cummulativeLineClears
-				);
+				// console.log("Current Score: ", nextState.score);
+				// console.log("Current Level: ", nextState.level);
+				// console.log(
+				// 	"Cummulative Line Clears: ",
+				// 	nextState.cummulativeLineClears
+				// );
 				return nextState;
 			}
 			return newState;
@@ -109,8 +124,15 @@ const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 					return resetGameState();
 				}
 				const numLinesCleared = numFullRows(addPieceToGrid(state).board);
-				const nextPiece = randomPiece();
+				const nextPiece = state.queue[0];
+				console.log("nextPiece: ", nextPiece.name);
+				console.log(
+					"queue initial: ",
+					state.queue.map(e => e.name)
+				);
 				const nextState = {
+					//...state,
+					queue: [...state.queue.slice(1), randomPiece()],
 					cummulativeLineClears: state.cummulativeLineClears + numLinesCleared,
 					level: calculateLevel(state.cummulativeLineClears),
 					score: state.score + calculateScore(numLinesCleared)(state.level),
@@ -121,13 +143,16 @@ const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 						shape: nextPiece.shape.map(subtract(nextPiece.rotationalCentre))
 					}
 				};
-				console.log("Current Score: ", nextState.score);
-				console.log("Current Level: ", nextState.level);
 				console.log(
-					"Cummulative Line Clears: ",
-					nextState.cummulativeLineClears
+					"queue next: ",
+					nextState.queue.map(e => e.name)
 				);
-				console.log(NewGameState);
+				// console.log("Current Score: ", nextState.score);
+				// console.log("Current Level: ", nextState.level);
+				// console.log(
+				// 	"Cummulative Line Clears: ",
+				// 	nextState.cummulativeLineClears
+				// );
 				return nextState;
 			}
 			return newState;
@@ -205,8 +230,22 @@ const main = () => {
 	const drawState = (tetrisState: GameState) => {
 		draw(tetrisState);
 	};
+	const writeScore = (gameState: GameState): void => {
+		document.getElementById("score").innerHTML = "Score: " + gameState.score;
+	};
+	const writeLevel = (gameState: GameState): void => {
+		document.getElementById("level").innerHTML = "Level: " + gameState.level;
+	};
+	const writeLinesCleared = (gameState: GameState): void => {
+		document.getElementById("linesCleared").innerHTML =
+			"Lines Cleared: " + gameState.cummulativeLineClears;
+	};
 	// tetrisSubscribe(drawState);
+	tetrisStore.subscribe(writeScore);
+	tetrisStore.subscribe(writeLevel);
+	tetrisStore.subscribe(writeLinesCleared);
 	tetrisStore.subscribe(drawState);
+
 	// tetrisSubscribe(tetrisState => {
 	// 	console.log("subscribe", tetrisState);
 	// 	draw(tetrisState);
@@ -216,7 +255,7 @@ const main = () => {
 // handles drawing on the canvas
 const draw = (gameState: GameState): void => {
 	drawGrid(gameState.board);
-	drawPiece(gameState.piece)(gameState.pos);
+	drawPieceGameBoard(gameState.piece)(gameState.pos);
 };
 
 var oop = 0;

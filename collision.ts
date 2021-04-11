@@ -1,5 +1,5 @@
 import { Complex, Piece, GameState, GameBoard } from "./types";
-import { CANVAS } from "./drawUtils";
+import { gameCanvas } from "./drawUtils";
 import { add } from "./complex";
 import { CELL } from "./constants";
 import { arrayExpression } from "@babel/types";
@@ -40,9 +40,9 @@ export const failed = (gameState: GameState): boolean => {
 };
 // checks if two pieces have collided
 export const squareCollision = (position1: Complex) => (position2: Complex) => {
-	if (!CANVAS) return;
-	const HEIGHT = CANVAS.clientHeight / 20;
-	const WIDTH = CANVAS.clientWidth / 10;
+	if (!gameCanvas) return;
+	const HEIGHT = gameCanvas.clientHeight / 20;
+	const WIDTH = gameCanvas.clientWidth / 10;
 	return (
 		position1.x < position2.x + WIDTH &&
 		position1.x + WIDTH > position2.x &&
@@ -118,9 +118,10 @@ export const numFullRows = (board: GameBoard) =>
 	);
 
 export const addPieceToGrid = (gameState: GameState): GameState => {
-	let GS = Object.assign({}, gameState);
-	relativePos(GS.piece)(GS.pos).forEach(element => {
-		GS.board[Math.trunc(element.y)][Math.trunc(element.x)] = GS.piece.id;
+	let GS = cloneDeep(gameState);
+
+	relativePos(GS.piece)(GS.pos).forEach(square => {
+		GS.board[Math.trunc(square.y)][Math.trunc(square.x)] = GS.piece.id;
 	});
 	return GS;
 };

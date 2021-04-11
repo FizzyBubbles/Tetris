@@ -2,37 +2,71 @@ import { Piece, Complex, GameBoard } from "./types";
 import { add } from "./complex";
 import { COLOURSCHEME } from "./constants";
 
-export let CANVAS = document.getElementById("board") as HTMLCanvasElement;
-export let c = CANVAS.getContext("2d");
+// Main Game Board Canvas references
+export let gameCanvas = document.getElementById("board") as HTMLCanvasElement;
+export let gameBoardContext = gameCanvas.getContext("2d");
+
+// Queue canvas display
+export let queueCanvas = document.getElementById("queue") as HTMLCanvasElement;
+export let queueContext = queueCanvas.getContext("2d");
 
 // draw square
-export const drawSquare = (colour: string) => (position: Complex): void => {
-	if (!c) return;
-	const HEIGHT = CANVAS.clientHeight / 20;
-	const WIDTH = CANVAS.clientWidth / 10;
-	c.fillStyle = colour;
-	c.fillRect(position.x * WIDTH, position.y * HEIGHT, WIDTH, HEIGHT);
+export const drawSquareGameBoard = (colour: string) => (
+	position: Complex
+): void => {
+	if (!gameBoardContext) return;
+	const HEIGHT = gameCanvas.clientHeight / 20;
+	const WIDTH = gameCanvas.clientWidth / 10;
+	gameBoardContext.fillStyle = colour;
+	gameBoardContext.fillRect(
+		position.x * WIDTH,
+		position.y * HEIGHT,
+		WIDTH,
+		HEIGHT
+	);
 };
 
 const drawPoint = (colour: string) => (position: Complex): void => {
-	if (!c) return;
-	const HEIGHT = CANVAS.clientHeight / 20;
-	const WIDTH = CANVAS.clientWidth / 10;
-	c.fillStyle = colour;
-	c.fillRect(position.x * WIDTH, position.y * HEIGHT, 5, 5);
-	console.log("bruh");
+	if (!gameBoardContext) return;
+	const HEIGHT = gameCanvas.clientHeight / 20;
+	const WIDTH = gameCanvas.clientWidth / 10;
+	gameBoardContext.fillStyle = colour;
+	gameBoardContext.fillRect(position.x * WIDTH, position.y * HEIGHT, 5, 5);
 };
 
 // draws a specified piece at a given position
-export const drawPiece = (piece: Piece) => (position: Complex): void => {
-	const colourSquare = drawSquare(piece.colour); // returns a function that draws a square with the colour of the piece
+export const drawPieceGameBoard = (piece: Piece) => (
+	position: Complex
+): void => {
+	const colourSquare = drawSquareGameBoard(piece.colour); // returns a function that draws a square with the colour of the piece
 	const displace = add(position); // returns a function which displaces the piece by the position
 
 	piece.shape.forEach(cell => {
 		colourSquare(displace(cell));
 	}); // draws each cell in its location
-
 	drawPoint("b")(position);
+};
+
+//QUEUE DRAWING
+
+export const drawSquareQueue = (colour: string) => (
+	position: Complex
+): void => {
+	if (!queueContext) return;
+	const HEIGHT = gameCanvas.clientHeight / 20;
+	const WIDTH = gameCanvas.clientWidth / 10;
+	queueContext.fillStyle = colour;
+	queueContext.fillRect(position.x * WIDTH, position.y * HEIGHT, WIDTH, HEIGHT);
+};
+
+// draws a specified piece at a given position on the Queue
+export const drawPieceQueue = (piece: Piece) => (position: Complex): void => {
+	const colourSquare = drawSquareQueue(piece.colour); // returns a function that draws a square with the colour of the piece
+	const displace = add(position); // returns a function which displaces the piece by the position
+
+	piece.shape.forEach(cell => {
+		colourSquare(displace(cell));
+	}); // draws each cell in its location
 };
 
 export const drawGrid = (grid: GameBoard): void => {
@@ -44,7 +78,7 @@ export const drawGrid = (grid: GameBoard): void => {
 		row.forEach((cell, j) => {
 			// for each cell within the row
 			// console.log(cell);
-			drawSquare(COLOURSCHEME[cell])({ x: j, y: i });
+			drawSquareGameBoard(COLOURSCHEME[cell])({ x: j, y: i });
 		})
 	);
 };
