@@ -125,7 +125,7 @@ export const PIECE = {
 	}
 };
 
-export const STARTINGPOS = { x: 3, y: 0 };
+export const STARTINGPOS = { x: 3, y: -1 };
 
 // whole game state
 export const NewGameState: GameState = {
