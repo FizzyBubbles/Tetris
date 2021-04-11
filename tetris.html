@@ -1,18 +1,38 @@
 <html>
 	<style>
-		/* #board {
-
-        } */
+		html {
+			background-color: black;
+		}
+		#board {
+			border: solid #707070;
+			border-width: 2px;
+			position: relative;
+			left: 32%;
+			top: 3%;
+		}
 		#container {
 			padding: 0;
 			height: 100%;
 			width: 100%;
 		}
+		#statBox {
+			position: relative;
+			top: 89%;
+			max-width: 200px;
+			left: 20%;
+			color: white;
+		}
 	</style>
 	<head> </head>
 	<body>
 		<div id="container">
+			<div id="statBox">
+				<div id="score"></div>
+				<div id="level"></div>
+				<div id="linesCleared"></div>
+			</div>
 			<canvas id="board" width="350" height="700"></canvas>
+			<canvas id="queue" width="140" height="525"></canvas>
 		</div>
 		<script src="build/Tetris.js"></script>
 	</body>
