@@ -1,6 +1,6 @@
 import { newGameBoard } from "./collision";
 import { GameState, Piece, PieceName } from "./types";
-import { randomPieces } from "./random";
+import { randomPieces, randomBag, randomPiece } from "./random";
 
 export const KeyBindings = {
 	left: 85,
@@ -12,6 +12,16 @@ export const KeyBindings = {
 	hold: 68,
 	reset: 82
 };
+//  export const KeyBindings = {
+// 	left: 37,
+// 	right: 39,
+// 	rotateClockwise: 38,
+// 	rotateAntiClockwise: 90,
+// 	softDrop: 40,
+// 	hardDrop: 32,
+// 	hold: 68,
+// 	reset: 82
+// };
 
 export const CELL = {
 	EMPTY: 0,
@@ -40,6 +50,7 @@ export const PIECE = {
 		id: 1,
 		name: "O_PIECE",
 		colour: COLOURSCHEME[1],
+		rotationState: 0,
 		rotationalCentre: { x: 0.5, y: -0.5 },
 		shape: [
 			{ x: 0, y: 0 },
@@ -52,6 +63,7 @@ export const PIECE = {
 		id: 2,
 		name: "I_PIECE",
 		colour: COLOURSCHEME[2],
+		rotationState: 0,
 		rotationalCentre: { x: 1.5, y: -0.5 },
 		shape: [
 			{ x: 0, y: 0 },
@@ -64,6 +76,7 @@ export const PIECE = {
 		id: 3,
 		name: "J_PIECE",
 		colour: COLOURSCHEME[3],
+		rotationState: 0,
 		rotationalCentre: { x: 1, y: 0 },
 		shape: [
 			{ x: 0, y: -1 },
@@ -76,6 +89,7 @@ export const PIECE = {
 		id: 4,
 		name: "L_PIECE",
 		colour: COLOURSCHEME[4],
+		rotationState: 0,
 		rotationalCentre: { x: 1, y: 0 },
 		shape: [
 			{ x: 0, y: 0 },
@@ -88,6 +102,7 @@ export const PIECE = {
 		id: 5,
 		name: "S_PIECE",
 		colour: COLOURSCHEME[5],
+		rotationState: 0,
 		rotationalCentre: { x: 1, y: 0 },
 		shape: [
 			{ x: 0, y: 0 },
@@ -100,6 +115,7 @@ export const PIECE = {
 		id: 6,
 		name: "Z_PIECE",
 		colour: COLOURSCHEME[6],
+		rotationState: 0,
 		rotationalCentre: { x: 1, y: 0 },
 		shape: [
 			{ x: 0, y: -1 },
@@ -112,6 +128,7 @@ export const PIECE = {
 		id: 7,
 		name: "T_PIECE",
 		colour: COLOURSCHEME[7],
+		rotationState: 0,
 		rotationalCentre: { x: 1, y: 0 },
 		shape: [
 			{ x: 0, y: 0 },
@@ -136,11 +153,11 @@ export const STARTINGPOS = { x: 3, y: -1 };
 
 // whole game state
 export const NewGameState: GameState = {
-	queue: randomPieces(5),
+	queue: randomBag(),
 	cummulativeLineClears: 10,
 	level: 0,
 	score: 0,
-	piece: PIECE.I_PIECE,
+	piece: randomPiece(),
 	pos: STARTINGPOS,
 	board: newGameBoard(10)(20)
 };

@@ -26,13 +26,13 @@ export const drawSquareGameBoard = (colour: string) => (
 	);
 };
 
-const drawPoint = (colour: string) => (position: Complex): void => {
-	if (!gameBoardContext) return;
-	const HEIGHT = gameCanvas.clientHeight / 20;
-	const WIDTH = gameCanvas.clientWidth / 10;
-	gameBoardContext.fillStyle = colour;
-	gameBoardContext.fillRect(position.x * WIDTH, position.y * HEIGHT, 5, 5);
-};
+// const drawPoint = (colour: string) => (position: Complex): void => {
+// 	if (!gameBoardContext) return;
+// 	const HEIGHT = gameCanvas.clientHeight / 20;
+// 	const WIDTH = gameCanvas.clientWidth / 10;
+// 	gameBoardContext.fillStyle = colour;
+// 	gameBoardContext.fillRect(position.x * WIDTH, position.y * HEIGHT, 5, 5);
+// };
 
 // draws a specified piece at a given position
 export const drawPieceGameBoard = (piece: Piece) => (
@@ -44,7 +44,7 @@ export const drawPieceGameBoard = (piece: Piece) => (
 	piece.shape.forEach(cell => {
 		colourSquare(displace(cell));
 	}); // draws each cell in its location
-	drawPoint("b")(position);
+	//drawPoint("b")(position);
 };
 
 //QUEUE DRAWING

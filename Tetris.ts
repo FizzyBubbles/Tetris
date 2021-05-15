@@ -36,12 +36,14 @@ import {
 	emptyRow,
 	newGameBoard,
 	numFullRows,
-	failed
+	failed,
+	wallKick,
+	hardDrop
 } from "./collision";
 import { stat } from "fs";
 import { calculateLevel, calculateScore } from "./scoring";
 import { statement } from "@babel/template";
-import { randomPiece } from "./random";
+import { randomPiece, randomBag } from "./random";
 import {
 	left,
 	right,
@@ -51,14 +53,24 @@ import {
 	settlePiece
 } from "./reducerHelpers";
 
-const resetGameState = (): GameState => cloneDeep(NewGameState);
+const resetGameState = (): GameState =>
+	cloneDeep({
+		queue: randomBag(),
+		cummulativeLineClears: 10,
+		level: 0,
+		score: 0,
+		piece: randomPiece(),
+		pos: STARTINGPOS,
+		board: newGameBoard(10)(20)
+	});
 
 var go = true;
 
 type GameAction =
 	| "MOVE-LEFT"
 	| "MOVE-RIGHT"
-	| "MOVE-DOWN"
+	| "SOFT-DROP"
+	| "HARD-DROP"
 	| "ROTATE-CLOCKWISE"
 	| "ROTATE-ANTICLOCKWISE"
 	| "CLOCK-TICK"
@@ -76,7 +88,7 @@ const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 			return pieceCollided(newState) ? state : newState;
 		}
 
-		case "MOVE-DOWN": {
+		case "SOFT-DROP": {
 			const newState = { ...state, pos: down(state.pos) };
 			if (pieceCollided(newState)) {
 				if (failed(state)) {
@@ -86,21 +98,41 @@ const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 			}
 			return newState;
 		}
-
+		case "HARD-DROP": {
+			return hardDrop(state);
+		}
 		case "ROTATE-ANTICLOCKWISE": {
 			const newState = {
 				...state,
-				piece: updatePiece(state.piece)(rotateAntiClockwise)
+				piece: {
+					...updatePiece(state.piece)(rotateAntiClockwise),
+					rotationState: (state.piece.rotationState + 3) % 4
+				}
 			};
-			return pieceCollided(newState) ? state : newState;
+			const WallKick = wallKick(newState)(state.piece.rotationState);
+			return WallKick == null
+				? state
+				: { ...newState, pos: add(WallKick)(newState.pos) };
 		}
 
 		case "ROTATE-CLOCKWISE": {
 			const newState = {
 				...state,
-				piece: updatePiece(state.piece)(rotateClockwise)
+				piece: {
+					...updatePiece(state.piece)(rotateClockwise),
+					rotationState: (state.piece.rotationState + 1) % 4
+				}
 			};
-			return pieceCollided(newState) ? state : newState;
+			console.log(
+				"ClockWise from" +
+					state.piece.rotationState +
+					" to " +
+					newState.piece.rotationState
+			);
+			const WallKick = wallKick(newState)(state.piece.rotationState);
+			return WallKick == null
+				? state
+				: { ...newState, pos: add(WallKick)(newState.pos) };
 		}
 
 		case "CLOCK-TICK": {
@@ -146,7 +178,7 @@ const makeStore = <State, Action>(
 
 const tetrisStore = makeStore(tetrisReducer, resetGameState());
 
-const updatePiece = (piece: Piece) => (
+export const updatePiece = (piece: Piece) => (
 	transformation: Transformation
 ): Piece => ({
 	...piece,
@@ -209,7 +241,10 @@ document.onkeydown = e => {
 			tetrisStore.dispatch("ROTATE-ANTICLOCKWISE");
 			break;
 		case KeyBindings.softDrop:
-			tetrisStore.dispatch("MOVE-DOWN");
+			tetrisStore.dispatch("SOFT-DROP");
+			break;
+		case KeyBindings.hardDrop:
+			tetrisStore.dispatch("HARD-DROP");
 			break;
 		case KeyBindings.hold:
 			go = !go;

@@ -1,6 +1,6 @@
 import { Transformation, GameState } from "./types";
 
-import { multiply, add, subtract } from "./complex";
+import { multiply, add, subtract, rotate, cis } from "./complex";
 import { numFullRows, addPieceToGrid, clearFullRows } from "./collision";
 import { randomPiece, randomBag } from "./random";
 import { calculateLevel, calculateScore } from "./scoring";
@@ -9,6 +9,7 @@ import { STARTINGPOS } from "./constants";
 // key press handling
 export const rotateClockwise: Transformation = multiply({ x: 0, y: 1 });
 export const rotateAntiClockwise: Transformation = multiply({ x: 0, y: -1 });
+export const rotate180: Transformation = multiply({ x: -1, y: 0 });
 export const down: Transformation = add({ x: 0, y: 1 });
 export const left: Transformation = add({ x: -1, y: 0 });
 export const right: Transformation = add({ x: 1, y: 0 });

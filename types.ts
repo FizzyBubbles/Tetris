@@ -13,8 +13,11 @@ export type PieceName =
 	| "Z_PIECE"
 	| "T_PIECE";
 
+export type rotationState = 0 | 1 | 2 | 3;
+
 export type Piece = {
 	id: number;
+	rotationState: number;
 	name: string;
 	colour: string;
 	shape: Complex[];
