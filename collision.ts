@@ -1,10 +1,25 @@
-import { Complex, Piece, GameState, GameBoard } from "./types";
+import {
+	Complex,
+	Piece,
+	GameState,
+	GameBoard,
+	rotationState,
+	Transformation
+} from "./types";
 import { gameCanvas } from "./drawUtils";
-import { add } from "./complex";
-import { CELL } from "./constants";
+import { add, multiply } from "./complex";
+import { CELL, PIECE } from "./constants";
 import { arrayExpression } from "@babel/types";
 import { Z_FILTERED } from "zlib";
 import { cloneDeep } from "lodash";
+import {
+	left,
+	rotateAntiClockwise,
+	rotateClockwise,
+	rotate180,
+	down
+} from "./reducerHelpers";
+import { updatePiece } from "./Tetris";
 
 // returns a game board of specified size with each value being an empty cell
 export const newGameBoard = (rowLength: number) => (
@@ -125,3 +140,170 @@ export const addPieceToGrid = (gameState: GameState): GameState => {
 	});
 	return GS;
 };
+
+export const wallKick = (state: GameState) => (
+	oldRotationState: number
+): Complex | null => {
+	const tests1_0 = [
+		// tests for state 1 to 0
+		{ x: 0, y: 0 },
+		{ x: -1, y: 0 },
+		{ x: -1, y: 1 },
+		{ x: 0, y: -2 },
+		{ x: -1, y: -2 }
+	];
+	const tests3_0 = [
+		// tests for state 3 to 0
+		{ x: 0, y: 0 },
+		{ x: 1, y: 0 },
+		{ x: 1, y: 1 },
+		{ x: 0, y: -2 },
+		{ x: 1, y: -2 }
+	];
+	const testsx_1 = [
+		// tests for any state into 1
+		{ x: 0, y: 0 },
+		{ x: 1, y: 0 },
+		{ x: 1, y: -1 },
+		{ x: 0, y: 2 },
+		{ x: 1, y: 2 }
+	];
+	const tests1_2 = [
+		// tests for state 1 to 2
+		{ x: 0, y: 0 },
+		{ x: -1, y: 0 },
+		{ x: -1, y: 1 },
+		{ x: 0, y: -2 },
+		{ x: -1, y: -2 }
+	];
+	const tests3_2 = [
+		// tests for state 3 to 2
+		{ x: 0, y: 0 },
+		{ x: 1, y: 0 },
+		{ x: 1, y: 1 },
+		{ x: 0, y: -2 },
+		{ x: 1, y: -2 }
+	];
+	const testsx_3 = [
+		// tests for any state into 3
+		{ x: 0, y: 0 },
+		{ x: -1, y: 0 },
+		{ x: -1, y: -1 },
+		{ x: 0, y: 2 },
+		{ x: -1, y: 2 }
+	];
+
+	const Itests0_1 = [
+		// tests for line flat to line vertical clockwise
+		{ x: 0, y: 0 },
+		{ x: 2, y: 0 },
+		{ x: -1, y: 0 },
+		{ x: 2, y: 1 },
+		{ x: -1, y: -2 }
+	];
+	const Itests3_2 = [
+		// tests for line flat to line vertical clockwise
+		{ x: 0, y: 0 },
+		{ x: 2, y: 0 },
+		{ x: -1, y: 0 },
+		{ x: 2, y: 1 },
+		{ x: -1, y: -2 }
+	];
+	const Itests1_0 = [
+		// tests for line vertical to line flat anti-clockwise
+		{ x: 0, y: 0 },
+		{ x: -2, y: 0 },
+		{ x: 1, y: 0 },
+		{ x: -2, y: -1 },
+		{ x: 1, y: 2 }
+	];
+	const Itests2_3 = [
+		// tests for line vertical to line flat anti-clockwise
+		{ x: 0, y: 0 },
+		{ x: -2, y: 0 },
+		{ x: 1, y: 0 },
+		{ x: -2, y: -1 },
+		{ x: 1, y: 2 }
+	];
+	const Itests1_2 = [
+		// tests for line vertical to line flat clockwise
+		{ x: 0, y: 0 },
+		{ x: 1, y: 0 },
+		{ x: -2, y: 0 },
+		{ x: 1, y: -2 },
+		{ x: -2, y: 1 }
+	];
+	const Itests0_3 = [
+		// tests for line vertical to line flat clockwise
+		{ x: 0, y: 0 },
+		{ x: 1, y: 0 },
+		{ x: -2, y: 0 },
+		{ x: 1, y: -2 },
+		{ x: -2, y: 1 }
+	];
+	const Itests2_1 = [
+		// tests for line flat to line vertical anti-clockwise
+		{ x: 0, y: 0 },
+		{ x: -1, y: 0 },
+		{ x: 2, y: 0 },
+		{ x: -1, y: 2 },
+		{ x: 2, y: -1 }
+	];
+	const Itests3_0 = [
+		// tests for line flat to line vertical anti-clockwise
+		{ x: 0, y: 0 },
+		{ x: -1, y: 0 },
+		{ x: 2, y: 0 },
+		{ x: -1, y: 2 },
+		{ x: 2, y: -1 }
+	];
+
+	const test = (testPositions: Complex[]): Complex | null => {
+		for (let i in testPositions) {
+			if (!pieceCollided({ ...state, pos: add(state.pos)(testPositions[i]) })) {
+				return testPositions[i];
+			}
+		}
+		return null;
+	};
+	let adjustment: Complex | null = { x: 0, y: 0 };
+	if (state.piece.name == "I_PIECE") {
+		switch (state.piece.rotationState) {
+			case 0:
+				adjustment = oldRotationState == 1 ? test(Itests1_0) : test(Itests3_0);
+				break;
+			case 1:
+				adjustment = oldRotationState == 0 ? test(Itests0_1) : test(Itests2_1);
+				break;
+			case 2:
+				adjustment = oldRotationState == 1 ? test(Itests1_2) : test(Itests3_2);
+				break;
+			case 3:
+				adjustment = oldRotationState == 0 ? test(Itests0_3) : test(Itests2_3);
+				break;
+		}
+	} else {
+		switch (state.piece.rotationState) {
+			case 0:
+				adjustment = oldRotationState == 1 ? test(tests1_0) : test(tests3_0);
+				break;
+			case 1:
+				adjustment = test(testsx_1);
+				break;
+			case 2:
+				adjustment = oldRotationState == 1 ? test(tests1_2) : test(tests3_2);
+				break;
+			case 3:
+				adjustment = test(testsx_3);
+				break;
+		}
+	}
+	return adjustment;
+};
+
+export const hardDrop = (
+	state: GameState
+): GameState => // recursively finds the lowest position the piece can be before collision
+	pieceCollided({ ...state, pos: down(state.pos) })
+		? state
+		: hardDrop({ ...state, pos: down(state.pos) });
