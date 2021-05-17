@@ -23,6 +23,7 @@ export const settlePiece = (state: GameState): GameState => {
 	// 	state.queue.map(e => e.name)
 	// );
 	const nextState = {
+		...state,
 		queue:
 			state.queue.length <= 7
 				? [...state.queue.slice(1), ...randomBag()]
