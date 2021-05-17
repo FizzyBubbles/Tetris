@@ -1,5 +1,8 @@
 <html>
 	<style>
+		body {
+			overflow: hidden; /* Hide scrollbars */
+		}
 		html {
 			background-color: black;
 		}
@@ -8,7 +11,7 @@
 			border-width: 2px;
 			position: relative;
 			left: 32%;
-			top: ;
+			top: 10%;
 		}
 		#board {
 			border: solid #707070;
@@ -17,8 +20,13 @@
 			left: 32%;
 		}
 		#gameDiv {
+			display: flex;
+			align-items: flex-start;
+			gap: 20px;
 		}
 		#container {
+			display: flex;
+			align-items: center;
 			padding: 0;
 			height: 100%;
 			width: 100%;
@@ -34,12 +42,12 @@
 	<head> </head>
 	<body>
 		<div id="container">
-			<div id="statBox">
-				<div id="score"></div>
-				<div id="level"></div>
-				<div id="linesCleared"></div>
-			</div>
 			<div id="gameDiv">
+				<div id="statBox">
+					<div id="score"></div>
+					<div id="level"></div>
+					<div id="linesCleared"></div>
+				</div>
 				<canvas id="board" width="350" height="700"></canvas>
 				<canvas id="queue" width="210" height="560"></canvas>
 			</div>
