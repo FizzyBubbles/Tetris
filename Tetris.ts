@@ -25,7 +25,10 @@ import {
 	drawGrid,
 	draw,
 	drawPieceQueue,
-	clearQueue
+	fillQueue,
+	fillHold,
+	drawPieceHold,
+	holdCanvas
 } from "./drawUtils";
 import {
 	pieceCollided,
@@ -54,7 +57,8 @@ import {
 	moveLeft,
 	moveRight,
 	rotatePieceAntiClockwise,
-	rotatePieceClockwise
+	rotatePieceClockwise,
+	resetPieceRotation
 } from "./reducerHelpers";
 import { ConsoleWriter } from "istanbul-lib-report";
 
@@ -72,11 +76,13 @@ const resetGameState = (): GameState => {
 		pos: add(firstPiece.rotationalCentre)(STARTINGPOS),
 		board: newGameBoard(10)(20),
 		tick: 0,
-		paused: false
+		paused: false,
+		holdPiece: "empty"
 	});
 };
 
 type GameAction =
+	| "HOLD"
 	| "MOVE-LEFT"
 	| "MOVE-RIGHT"
 	| "SOFT-DROP"
@@ -89,6 +95,42 @@ type GameAction =
 
 const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 	switch (action) {
+		case "HOLD": {
+			// TODO: figure out what the fuck you are doing here
+			const nextHold = {
+				...resetPieceRotation(state.piece),
+				shape: resetPieceRotation(state.piece).shape.map(
+					add(state.piece.rotationalCentre)
+				)
+			};
+			if (state.holdPiece == "empty") {
+				const nextPiece = state.queue[0];
+				const nextQueue = state.queue.slice(1);
+				const nextState = {
+					...state,
+					pos: add(nextPiece.rotationalCentre)(STARTINGPOS),
+					holdPiece: nextHold,
+					queue: nextQueue,
+					piece: {
+						...nextPiece,
+						shape: nextPiece.shape.map(subtract(nextPiece.rotationalCentre))
+					}
+				};
+				return nextState;
+			} else {
+				const nextPiece = state.holdPiece;
+				const nextState = {
+					...state,
+					pos: add(nextPiece.rotationalCentre)(STARTINGPOS),
+					holdPiece: nextHold,
+					piece: {
+						...nextPiece,
+						shape: nextPiece.shape.map(subtract(nextPiece.rotationalCentre))
+					}
+				};
+				return nextState;
+			}
+		}
 		case "MOVE-LEFT": {
 			if (state.paused) return state; // returns state if paused
 			const newState = moveLeft(state);
@@ -222,10 +264,16 @@ const main = () => {
 			"Lines Cleared: " + gameState.cummulativeLineClears;
 	};
 	const drawQueue = (gameState: GameState): void => {
-		clearQueue(COLOURSCHEME[0]);
+		fillQueue(COLOURSCHEME[0]);
 		gameState.queue.forEach((p, i) =>
 			drawPieceQueue(p)({ x: 1, y: i * 3 + 2 })
 		);
+	};
+	const drawHold = (gameState: GameState): void => {
+		fillHold(COLOURSCHEME[0]);
+		if (gameState.holdPiece != "empty") {
+			drawPieceHold(gameState.holdPiece)({ x: 1, y: 2 });
+		}
 	};
 
 	tetrisStore.subscribe(writeScore);
@@ -233,6 +281,7 @@ const main = () => {
 	tetrisStore.subscribe(writeLinesCleared);
 	tetrisStore.subscribe(drawState);
 	tetrisStore.subscribe(drawQueue);
+	tetrisStore.subscribe(drawHold);
 };
 
 const loop = (timestamp: number) => {
@@ -252,7 +301,11 @@ document.onkeydown = e => {
 			tetrisStore.dispatch("MOVE-RIGHT");
 			break;
 
-		case KeyBindings.rotateClockwise:
+		case KeyBindings.rotateClockwise1:
+			tetrisStore.dispatch("ROTATE-CLOCKWISE");
+			break;
+
+		case KeyBindings.rotateClockwise2:
 			tetrisStore.dispatch("ROTATE-CLOCKWISE");
 			break;
 
@@ -269,11 +322,17 @@ document.onkeydown = e => {
 			break;
 
 		case KeyBindings.hold:
-			tetrisStore.dispatch("PAUSE");
+			tetrisStore.dispatch("HOLD");
 			break;
 
 		case KeyBindings.reset:
 			tetrisStore.dispatch("RESET");
+			break;
+		case KeyBindings.pause1:
+			tetrisStore.dispatch("PAUSE");
+			break;
+		case KeyBindings.pause2:
+			tetrisStore.dispatch("PAUSE");
 			break;
 	}
 };

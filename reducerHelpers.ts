@@ -30,6 +30,10 @@ export const rotatePieceAntiClockwise = (piece: Piece): Piece => ({
 	...updatePiece(piece)(rotateAntiClockwise),
 	rotationState: (piece.rotationState + 3) % 4
 });
+export const rotatePiece180 = (piece: Piece): Piece => ({
+	...updatePiece(piece)(rotate180),
+	rotationState: (piece.rotationState + 2) % 4
+});
 
 export const updatePiece = (piece: Piece) => (
 	transformation: Transformation
@@ -37,6 +41,26 @@ export const updatePiece = (piece: Piece) => (
 	...piece,
 	shape: piece.shape.map(transformation)
 });
+
+export const resetPieceRotation = (piece: Piece): Piece => {
+	let basePiece = piece;
+	switch (piece.rotationState) {
+		case 0:
+			basePiece = piece;
+			break;
+		case 1:
+			basePiece = rotatePieceAntiClockwise(piece);
+			break;
+		case 2:
+			basePiece = rotatePiece180(piece);
+			break;
+		case 3:
+			basePiece = rotatePieceClockwise(piece);
+			break;
+	}
+	console.log(basePiece);
+	return basePiece;
+};
 
 export const settlePiece = (state: GameState): GameState => {
 	const numLinesCleared = numFullRows(addPieceToGrid(state).board);

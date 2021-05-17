@@ -10,6 +10,9 @@ export let gameBoardContext = gameCanvas.getContext("2d");
 export let queueCanvas = document.getElementById("queue") as HTMLCanvasElement;
 export let queueContext = queueCanvas.getContext("2d");
 
+// Hold canvas references
+export let holdCanvas = document.getElementById("hold") as HTMLCanvasElement;
+export let holdContext = holdCanvas.getContext("2d");
 // draw square
 export const drawSquareGameBoard = (colour: string) => (
 	position: Complex
@@ -26,13 +29,31 @@ export const drawSquareGameBoard = (colour: string) => (
 	);
 };
 
-// const drawPoint = (colour: string) => (position: Complex): void => {
-// 	if (!gameBoardContext) return;
-// 	const HEIGHT = gameCanvas.clientHeight / 20;
-// 	const WIDTH = gameCanvas.clientWidth / 10;
-// 	gameBoardContext.fillStyle = colour;
-// 	gameBoardContext.fillRect(position.x * WIDTH, position.y * HEIGHT, 5, 5);
-// };
+export const drawSquareQueue = (colour: string) => (
+	position: Complex
+): void => {
+	if (!queueContext) return;
+	const HEIGHT = gameCanvas.clientHeight / 20;
+	const WIDTH = gameCanvas.clientWidth / 10;
+	queueContext.fillStyle = colour;
+	queueContext.fillRect(position.x * WIDTH, position.y * HEIGHT, WIDTH, HEIGHT);
+};
+
+export const drawSquareHold = (colour: string) => (position: Complex): void => {
+	if (!holdContext) return;
+	const HEIGHT = gameCanvas.clientHeight / 20;
+	const WIDTH = gameCanvas.clientWidth / 10;
+	holdContext.fillStyle = colour;
+	holdContext.fillRect(position.x * WIDTH, position.y * HEIGHT, WIDTH, HEIGHT);
+};
+
+export const drawPoint = (colour: string) => (position: Complex): void => {
+	if (!gameBoardContext) return;
+	const HEIGHT = gameCanvas.clientHeight / 20;
+	const WIDTH = gameCanvas.clientWidth / 10;
+	gameBoardContext.fillStyle = colour;
+	gameBoardContext.fillRect(position.x * WIDTH, position.y * HEIGHT, 5, 5);
+};
 
 // draws a specified piece at a given position
 export const drawPieceGameBoard = (piece: Piece) => (
@@ -47,18 +68,6 @@ export const drawPieceGameBoard = (piece: Piece) => (
 	//drawPoint("b")(position);
 };
 
-//QUEUE DRAWING
-
-export const drawSquareQueue = (colour: string) => (
-	position: Complex
-): void => {
-	if (!queueContext) return;
-	const HEIGHT = gameCanvas.clientHeight / 20;
-	const WIDTH = gameCanvas.clientWidth / 10;
-	queueContext.fillStyle = colour;
-	queueContext.fillRect(position.x * WIDTH, position.y * HEIGHT, WIDTH, HEIGHT);
-};
-
 // draws a specified piece at a given position on the Queue
 export const drawPieceQueue = (piece: Piece) => (position: Complex): void => {
 	const colourSquare = drawSquareQueue(piece.colour); // returns a function that draws a square with the colour of the piece
@@ -69,12 +78,30 @@ export const drawPieceQueue = (piece: Piece) => (position: Complex): void => {
 	}); // draws each cell in its location
 };
 
-export const clearQueue = (colour: string): void => {
+// draws a specified piece at a given position on the Queue
+export const drawPieceHold = (piece: Piece) => (position: Complex): void => {
+	const colourSquare = drawSquareHold(piece.colour); // returns a function that draws a square with the colour of the piece
+	const displace = add(position); // returns a function which displaces the piece by the position
+
+	piece.shape.forEach(cell => {
+		colourSquare(displace(cell));
+	}); // draws each cell in its location
+};
+
+export const fillQueue = (colour: string): void => {
 	if (!queueContext) return;
-	const HEIGHT = gameCanvas.clientHeight;
-	const WIDTH = gameCanvas.clientWidth;
+	const HEIGHT = queueCanvas.clientHeight;
+	const WIDTH = queueCanvas.clientWidth;
 	queueContext.fillStyle = colour;
 	queueContext.fillRect(0, 0, WIDTH, HEIGHT);
+};
+
+export const fillHold = (colour: string): void => {
+	if (!holdContext) return;
+	const HEIGHT = holdCanvas.clientHeight;
+	const WIDTH = holdCanvas.clientWidth;
+	holdContext.fillStyle = colour;
+	holdContext.fillRect(0, 0, WIDTH, HEIGHT);
 };
 
 export const drawGrid = (grid: GameBoard): void => {

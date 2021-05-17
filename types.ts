@@ -34,6 +34,7 @@ export type GameState = {
 	board: GameBoard;
 	tick: number;
 	paused: Boolean;
+	holdPiece: Piece | "empty";
 };
 
 export type Input = {

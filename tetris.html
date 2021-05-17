@@ -6,18 +6,20 @@
 		html {
 			background-color: black;
 		}
+		#hold {
+			border: solid #707070;
+			border-width: 2px;
+			position: relative;
+		}
 		#queue {
 			border: solid #707070;
 			border-width: 2px;
 			position: relative;
-			left: 32%;
-			top: 10%;
 		}
 		#board {
 			border: solid #707070;
 			border-width: 2px;
 			position: relative;
-			left: 32%;
 		}
 		#gameDiv {
 			display: flex;
@@ -48,6 +50,7 @@
 					<div id="level"></div>
 					<div id="linesCleared"></div>
 				</div>
+				<canvas id="hold" width="210" height="140"></canvas>
 				<canvas id="board" width="350" height="700"></canvas>
 				<canvas id="queue" width="210" height="560"></canvas>
 			</div>

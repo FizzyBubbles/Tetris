@@ -2,26 +2,30 @@ import { newGameBoard } from "./collision";
 import { GameState, Piece, PieceName } from "./types";
 import { randomPieces, randomBag, randomPiece } from "./random";
 
-export const KeyBindings = {
-	left: 85,
-	right: 48,
-	rotateClockwise: 70,
-	rotateAntiClockwise: 83,
-	softDrop: 57,
-	hardDrop: 32,
-	hold: 68,
-	reset: 82
-};
 // export const KeyBindings = {
-// 	left: 37,
-// 	right: 39,
-// 	rotateClockwise: 38,
-// 	rotateAntiClockwise: 90,
-// 	softDrop: 40,
+// 	left: 85,
+// 	right: 48,
+// 	rotateClockwise: 70,
+// 	rotateAntiClockwise: 83,
+// 	softDrop: 57,
 // 	hardDrop: 32,
 // 	hold: 68,
-// 	reset: 82
+// 	reset: 82,
+// 	pause: 80
 // };
+export const KeyBindings = {
+	left: 37,
+	right: 39,
+	rotateClockwise1: 38,
+	rotateClockwise2: 88,
+	rotateAntiClockwise: 90,
+	softDrop: 40,
+	hardDrop: 32,
+	hold: 67,
+	reset: 82,
+	pause1: 80,
+	pause2: 27
+};
 
 export const CELL = {
 	EMPTY: 0,
@@ -161,5 +165,6 @@ export const NewGameState: GameState = {
 	pos: STARTINGPOS,
 	board: newGameBoard(10)(20),
 	tick: 0,
-	paused: false
+	paused: false,
+	holdPiece: "empty"
 };
