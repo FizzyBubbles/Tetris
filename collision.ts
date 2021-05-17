@@ -144,8 +144,48 @@ export const addPieceToGrid = (gameState: GameState): GameState => {
 export const wallKick = (state: GameState) => (
 	oldRotationState: number
 ): Complex | null => {
+	const tests0_1 = [
+		// tests for state 0 to 1
+		{ x: 0, y: 0 },
+		{ x: -1, y: 0 },
+		{ x: -1, y: -1 },
+		{ x: 0, y: 2 },
+		{ x: -1, y: 2 }
+	];
 	const tests1_0 = [
 		// tests for state 1 to 0
+		{ x: 0, y: 0 },
+		{ x: 1, y: 0 },
+		{ x: 1, y: 1 },
+		{ x: 0, y: -2 },
+		{ x: 1, y: -2 }
+	];
+	const tests1_2 = [
+		// tests for state 1 to 2
+		{ x: 0, y: 0 },
+		{ x: 1, y: 0 },
+		{ x: 1, y: 1 },
+		{ x: 0, y: -2 },
+		{ x: 1, y: -2 }
+	];
+	const tests2_1 = [
+		// tests for state 2 to 1
+		{ x: 0, y: 0 },
+		{ x: -1, y: 0 },
+		{ x: -1, y: -1 },
+		{ x: 0, y: 2 },
+		{ x: -1, y: 2 }
+	];
+	const tests2_3 = [
+		// tests for state 2 to 3
+		{ x: 0, y: 0 },
+		{ x: 1, y: 0 },
+		{ x: 1, y: -1 },
+		{ x: 0, y: 2 },
+		{ x: 1, y: 2 }
+	];
+	const tests3_2 = [
+		// tests for state 3 to 2
 		{ x: 0, y: 0 },
 		{ x: -1, y: 0 },
 		{ x: -1, y: 1 },
@@ -153,55 +193,23 @@ export const wallKick = (state: GameState) => (
 		{ x: -1, y: -2 }
 	];
 	const tests3_0 = [
-		// tests for state 3 to 0
-		{ x: 0, y: 0 },
-		{ x: 1, y: 0 },
-		{ x: 1, y: 1 },
-		{ x: 0, y: -2 },
-		{ x: 1, y: -2 }
-	];
-	const testsx_1 = [
-		// tests for any state into 1
-		{ x: 0, y: 0 },
-		{ x: 1, y: 0 },
-		{ x: 1, y: -1 },
-		{ x: 0, y: 2 },
-		{ x: 1, y: 2 }
-	];
-	const tests1_2 = [
-		// tests for state 1 to 2
+		// tests for state 3 to 2
 		{ x: 0, y: 0 },
 		{ x: -1, y: 0 },
 		{ x: -1, y: 1 },
 		{ x: 0, y: -2 },
 		{ x: -1, y: -2 }
 	];
-	const tests3_2 = [
-		// tests for state 3 to 2
-		{ x: 0, y: 0 },
-		{ x: 1, y: 0 },
-		{ x: 1, y: 1 },
-		{ x: 0, y: -2 },
-		{ x: 1, y: -2 }
-	];
-	const testsx_3 = [
+	const tests0_3 = [
 		// tests for any state into 3
 		{ x: 0, y: 0 },
-		{ x: -1, y: 0 },
-		{ x: -1, y: -1 },
+		{ x: 1, y: 0 },
+		{ x: 1, y: -1 },
 		{ x: 0, y: 2 },
-		{ x: -1, y: 2 }
+		{ x: 1, y: 2 }
 	];
 
 	const Itests0_1 = [
-		// tests for line flat to line vertical clockwise
-		{ x: 0, y: 0 },
-		{ x: 2, y: 0 },
-		{ x: -1, y: 0 },
-		{ x: 2, y: 1 },
-		{ x: -1, y: -2 }
-	];
-	const Itests3_2 = [
 		// tests for line flat to line vertical clockwise
 		{ x: 0, y: 0 },
 		{ x: 2, y: 0 },
@@ -217,14 +225,6 @@ export const wallKick = (state: GameState) => (
 		{ x: -2, y: -1 },
 		{ x: 1, y: 2 }
 	];
-	const Itests2_3 = [
-		// tests for line vertical to line flat anti-clockwise
-		{ x: 0, y: 0 },
-		{ x: -2, y: 0 },
-		{ x: 1, y: 0 },
-		{ x: -2, y: -1 },
-		{ x: 1, y: 2 }
-	];
 	const Itests1_2 = [
 		// tests for line vertical to line flat clockwise
 		{ x: 0, y: 0 },
@@ -233,6 +233,23 @@ export const wallKick = (state: GameState) => (
 		{ x: 1, y: -2 },
 		{ x: -2, y: 1 }
 	];
+	const Itests2_3 = [
+		// tests for line vertical to line flat anti-clockwise
+		{ x: 0, y: 0 },
+		{ x: -2, y: 0 },
+		{ x: 1, y: 0 },
+		{ x: -2, y: -1 },
+		{ x: 1, y: 2 }
+	];
+	const Itests3_2 = [
+		// tests for line flat to line vertical clockwise
+		{ x: 0, y: 0 },
+		{ x: 2, y: 0 },
+		{ x: -1, y: 0 },
+		{ x: 2, y: 1 },
+		{ x: -1, y: -2 }
+	];
+
 	const Itests0_3 = [
 		// tests for line vertical to line flat clockwise
 		{ x: 0, y: 0 },
@@ -260,6 +277,7 @@ export const wallKick = (state: GameState) => (
 
 	const test = (testPositions: Complex[]): Complex | null => {
 		for (let i in testPositions) {
+			console.log(testPositions[i]);
 			if (!pieceCollided({ ...state, pos: add(state.pos)(testPositions[i]) })) {
 				return testPositions[i];
 			}
@@ -288,16 +306,17 @@ export const wallKick = (state: GameState) => (
 				adjustment = oldRotationState == 1 ? test(tests1_0) : test(tests3_0);
 				break;
 			case 1:
-				adjustment = test(testsx_1);
+				adjustment = oldRotationState == 0 ? test(tests0_1) : test(tests2_1);
 				break;
 			case 2:
 				adjustment = oldRotationState == 1 ? test(tests1_2) : test(tests3_2);
 				break;
 			case 3:
-				adjustment = test(testsx_3);
+				adjustment = oldRotationState == 0 ? test(tests0_3) : test(tests2_3);
 				break;
 		}
 	}
+	console.log(adjustment);
 	return adjustment;
 };
 
