@@ -32,6 +32,7 @@ export type GameState = {
 	piece: Piece;
 	pos: Complex;
 	board: GameBoard;
+	tick: number;
 };
 
 export type Input = {

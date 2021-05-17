@@ -12,7 +12,7 @@ export const KeyBindings = {
 	hold: 68,
 	reset: 82
 };
-//  export const KeyBindings = {
+// export const KeyBindings = {
 // 	left: 37,
 // 	right: 39,
 // 	rotateClockwise: 38,
@@ -154,10 +154,11 @@ export const STARTINGPOS = { x: 3, y: -1 };
 // whole game state
 export const NewGameState: GameState = {
 	queue: randomBag(),
-	cummulativeLineClears: 10,
+	cummulativeLineClears: 0,
 	level: 0,
 	score: 0,
 	piece: randomPiece(),
 	pos: STARTINGPOS,
-	board: newGameBoard(10)(20)
+	board: newGameBoard(10)(20),
+	tick: 0
 };

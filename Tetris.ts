@@ -52,18 +52,24 @@ import {
 	rotateClockwise,
 	settlePiece
 } from "./reducerHelpers";
+import { ConsoleWriter } from "istanbul-lib-report";
 
-const resetGameState = (): GameState =>
-	cloneDeep({
+const resetGameState = (): GameState => {
+	const firstPiece = randomPiece();
+	return cloneDeep({
 		queue: randomBag(),
-		cummulativeLineClears: 10,
+		cummulativeLineClears: 0,
 		level: 0,
 		score: 0,
-		piece: randomPiece(),
-		pos: STARTINGPOS,
-		board: newGameBoard(10)(20)
+		piece: {
+			...firstPiece,
+			shape: firstPiece.shape.map(subtract(firstPiece.rotationalCentre))
+		},
+		pos: add(firstPiece.rotationalCentre)(STARTINGPOS),
+		board: newGameBoard(10)(20),
+		tick: 0
 	});
-
+};
 var go = true;
 
 type GameAction =
@@ -136,14 +142,21 @@ const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 		}
 
 		case "CLOCK-TICK": {
-			const newState = { ...state, pos: down(state.pos) };
-			if (pieceCollided(newState)) {
-				if (failed(state)) {
-					return resetGameState();
+			const newState = { ...state, pos: down(state.pos), tick: 0 };
+			console.log(state.tick);
+			if (
+				state.tick >=
+				10 * Math.pow(0.8 - (state.level - 1) * 0.007, state.level - 1) // speed calculation
+			) {
+				if (pieceCollided(newState)) {
+					if (failed(state)) {
+						return resetGameState();
+					}
+					return { ...settlePiece(state), tick: 0 };
 				}
-				return settlePiece(state);
+				return newState;
 			}
-			return newState;
+			return { ...state, tick: state.tick + 1 };
 		}
 
 		case "RESET": {
@@ -213,14 +226,8 @@ const main = () => {
 	tetrisStore.subscribe(drawQueue);
 };
 
-var oop = 0;
-
 const loop = (timestamp: number) => {
-	oop = oop + 1;
-	if (oop >= 10 && go) {
-		tetrisStore.dispatch("CLOCK-TICK");
-		oop = 0;
-	}
+	tetrisStore.dispatch("CLOCK-TICK");
 	window.requestAnimationFrame(loop);
 };
 
