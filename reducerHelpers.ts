@@ -14,6 +14,15 @@ export const down: Transformation = add({ x: 0, y: 1 });
 export const left: Transformation = add({ x: -1, y: 0 });
 export const right: Transformation = add({ x: 1, y: 0 });
 
+export const moveLeft = (state: GameState): GameState => ({
+	...state,
+	pos: left(state.pos)
+}); // TODO: make sure this isn't an unnecessary abstraction
+export const moveRight = (state: GameState): GameState => ({
+	...state,
+	pos: right(state.pos)
+});
+
 export const settlePiece = (state: GameState): GameState => {
 	const numLinesCleared = numFullRows(addPieceToGrid(state).board);
 	const nextPiece = state.queue[0];
