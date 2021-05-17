@@ -160,5 +160,6 @@ export const NewGameState: GameState = {
 	piece: randomPiece(),
 	pos: STARTINGPOS,
 	board: newGameBoard(10)(20),
-	tick: 0
+	tick: 0,
+	paused: false
 };

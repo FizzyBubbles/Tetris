@@ -33,6 +33,7 @@ export type GameState = {
 	pos: Complex;
 	board: GameBoard;
 	tick: number;
+	paused: Boolean;
 };
 
 export type Input = {

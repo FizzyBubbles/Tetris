@@ -67,10 +67,10 @@ const resetGameState = (): GameState => {
 		},
 		pos: add(firstPiece.rotationalCentre)(STARTINGPOS),
 		board: newGameBoard(10)(20),
-		tick: 0
+		tick: 0,
+		paused: false
 	});
 };
-var go = true;
 
 type GameAction =
 	| "MOVE-LEFT"
@@ -79,6 +79,7 @@ type GameAction =
 	| "HARD-DROP"
 	| "ROTATE-CLOCKWISE"
 	| "ROTATE-ANTICLOCKWISE"
+	| "PAUSE"
 	| "CLOCK-TICK"
 	| "RESET";
 
@@ -86,12 +87,18 @@ const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 	switch (action) {
 		case "MOVE-LEFT": {
 			const newState = { ...state, pos: left(state.pos) };
-			return pieceCollided(newState) ? state : newState;
+			if (!state.paused) {
+				return pieceCollided(newState) ? state : newState;
+			}
+			return state;
 		}
 
 		case "MOVE-RIGHT": {
 			const newState = { ...state, pos: right(state.pos) };
-			return pieceCollided(newState) ? state : newState;
+			if (!state.paused) {
+				return pieceCollided(newState) ? state : newState;
+			}
+			return state;
 		}
 
 		case "SOFT-DROP": {
@@ -102,10 +109,10 @@ const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 				}
 				return settlePiece(state);
 			}
-			return newState;
+			return !state.paused ? newState : state;
 		}
 		case "HARD-DROP": {
-			return hardDrop(state);
+			return !state.paused ? hardDrop(state) : state;
 		}
 		case "ROTATE-ANTICLOCKWISE": {
 			const newState = {
@@ -116,9 +123,12 @@ const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 				}
 			};
 			const WallKick = wallKick(newState)(state.piece.rotationState);
-			return WallKick == null
-				? state
-				: { ...newState, pos: add(WallKick)(newState.pos) };
+			if (!state.paused) {
+				return WallKick == null
+					? state
+					: { ...newState, pos: add(WallKick)(newState.pos) };
+			}
+			return state;
 		}
 
 		case "ROTATE-CLOCKWISE": {
@@ -129,24 +139,24 @@ const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 					rotationState: (state.piece.rotationState + 1) % 4
 				}
 			};
-			console.log(
-				"ClockWise from" +
-					state.piece.rotationState +
-					" to " +
-					newState.piece.rotationState
-			);
 			const WallKick = wallKick(newState)(state.piece.rotationState);
-			return WallKick == null
-				? state
-				: { ...newState, pos: add(WallKick)(newState.pos) };
+			if (!state.paused) {
+				return WallKick == null
+					? state
+					: { ...newState, pos: add(WallKick)(newState.pos) };
+			}
+			return state;
 		}
+
+		case "PAUSE":
+			return { ...state, paused: !state.paused };
 
 		case "CLOCK-TICK": {
 			const newState = { ...state, pos: down(state.pos), tick: 0 };
-			console.log(state.tick);
 			if (
 				state.tick >=
-				10 * Math.pow(0.8 - (state.level - 1) * 0.007, state.level - 1) // speed calculation
+					10 * Math.pow(0.8 - (state.level - 1) * 0.007, state.level - 1) &&
+				!state.paused // speed calculation
 			) {
 				if (pieceCollided(newState)) {
 					if (failed(state)) {
@@ -254,7 +264,7 @@ document.onkeydown = e => {
 			tetrisStore.dispatch("HARD-DROP");
 			break;
 		case KeyBindings.hold:
-			go = !go;
+			tetrisStore.dispatch("PAUSE");
 			break;
 		case KeyBindings.reset:
 			tetrisStore.dispatch("RESET");
