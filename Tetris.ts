@@ -113,7 +113,7 @@ const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 		}
 		case "HARD-DROP": {
 			const newState = hardDrop(state);
-			if (failed(state)) {
+			if (failed(newState)) {
 				return resetGameState();
 			}
 			return !state.paused ? settlePiece(newState) : state;
