@@ -21,7 +21,7 @@ export const moveLeft = (state: GameState): GameState => ({
 export const moveRight = (state: GameState): GameState => ({
 	...state,
 	pos: right(state.pos)
-});
+}); // TODO: make sure this isn't an unnecessary abstraction
 
 export const settlePiece = (state: GameState): GameState => {
 	const numLinesCleared = numFullRows(addPieceToGrid(state).board);
