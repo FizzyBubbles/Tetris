@@ -52,7 +52,9 @@ import {
 	rotateClockwise,
 	settlePiece,
 	moveLeft,
-	moveRight
+	moveRight,
+	rotatePieceAntiClockwise,
+	rotatePieceClockwise
 } from "./reducerHelpers";
 import { ConsoleWriter } from "istanbul-lib-report";
 
@@ -88,61 +90,65 @@ type GameAction =
 const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 	switch (action) {
 		case "MOVE-LEFT": {
-			if (state.paused) return state;
+			if (state.paused) return state; // returns state if paused
 			const newState = moveLeft(state);
 			return pieceCollided(newState) ? state : newState;
 		}
 
 		case "MOVE-RIGHT": {
-			if (state.paused) return state;
+			if (state.paused) return state; // returns state if paused
 			const newState = moveRight(state);
 			return pieceCollided(newState) ? state : newState;
 		}
 
 		case "SOFT-DROP": {
-			if (state.paused) return state;
+			if (state.paused) return state; // returns state if paused
 			const newState = { ...state, pos: down(state.pos) };
 			if (pieceCollided(newState)) {
-				if (failed(state)) {
+				if (failed(newState)) {
 					return resetGameState();
 				}
 				return settlePiece(state);
 			}
 			return newState;
 		}
+
 		case "HARD-DROP": {
-			if (state.paused) return state;
+			if (state.paused) return state; // returns state if paused
 			const newState = hardDrop(state);
 			if (failed(newState)) {
 				return resetGameState();
 			}
 			return settlePiece(newState);
 		}
+
 		case "ROTATE-ANTICLOCKWISE": {
-			if (state.paused) return state;
+			if (state.paused) return state; // returns state if paused
 			const newState = {
 				...state,
-				piece: {
-					...updatePiece(state.piece)(rotateAntiClockwise),
-					rotationState: (state.piece.rotationState + 3) % 4
-				}
+				piece: rotatePieceAntiClockwise(state.piece)
 			};
+
+			// wallKick returns the displacement a piece has based on some tests or null if it fails all tests
 			const WallKick = wallKick(newState)(state.piece.rotationState);
+
+			// if no wall kick tests were passed (null) it will not perform the rotation else it will displace the newState by the wallkick
 			return WallKick == null
 				? state
 				: { ...newState, pos: add(WallKick)(newState.pos) };
 		}
 
 		case "ROTATE-CLOCKWISE": {
-			if (state.paused) return state;
+			if (state.paused) return state; // returns state if paused
 			const newState = {
 				...state,
-				piece: {
-					...updatePiece(state.piece)(rotateClockwise),
-					rotationState: (state.piece.rotationState + 1) % 4
-				}
+				piece: rotatePieceClockwise(state.piece)
 			};
+
+			// wallKick returns the displacement a piece has based on some tests or null if it fails all tests
 			const WallKick = wallKick(newState)(state.piece.rotationState);
+
+			// if no wall kick tests were passed (null) it will not perform the rotation else it will displace the newState by the wallkick
 			return WallKick == null
 				? state
 				: { ...newState, pos: add(WallKick)(newState.pos) };
@@ -152,14 +158,14 @@ const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 			return { ...state, paused: !state.paused };
 
 		case "CLOCK-TICK": {
+			if (state.paused) return state;
 			const newState = { ...state, pos: down(state.pos), tick: 0 };
 			if (
 				state.tick >=
-					10 * Math.pow(0.8 - (state.level - 1) * 0.007, state.level - 1) &&
-				!state.paused // speed calculation
+				10 * Math.pow(0.8 - (state.level - 1) * 0.007, state.level - 1) // speed calculation
 			) {
 				if (pieceCollided(newState)) {
-					if (failed(state)) {
+					if (failed(newState)) {
 						return resetGameState();
 					}
 					return { ...settlePiece(state), tick: 0 };
@@ -201,13 +207,6 @@ const makeStore = <State, Action>(
 
 const tetrisStore = makeStore(tetrisReducer, resetGameState());
 
-export const updatePiece = (piece: Piece) => (
-	transformation: Transformation
-): Piece => ({
-	...piece,
-	shape: piece.shape.map(transformation)
-});
-
 const main = () => {
 	const drawState = (tetrisState: GameState) => {
 		draw(tetrisState);
@@ -248,24 +247,31 @@ document.onkeydown = e => {
 		case KeyBindings.left:
 			tetrisStore.dispatch("MOVE-LEFT");
 			break;
+
 		case KeyBindings.right:
 			tetrisStore.dispatch("MOVE-RIGHT");
 			break;
+
 		case KeyBindings.rotateClockwise:
 			tetrisStore.dispatch("ROTATE-CLOCKWISE");
 			break;
+
 		case KeyBindings.rotateAntiClockwise:
 			tetrisStore.dispatch("ROTATE-ANTICLOCKWISE");
 			break;
+
 		case KeyBindings.softDrop:
 			tetrisStore.dispatch("SOFT-DROP");
 			break;
+
 		case KeyBindings.hardDrop:
 			tetrisStore.dispatch("HARD-DROP");
 			break;
+
 		case KeyBindings.hold:
 			tetrisStore.dispatch("PAUSE");
 			break;
+
 		case KeyBindings.reset:
 			tetrisStore.dispatch("RESET");
 			break;
@@ -273,32 +279,3 @@ document.onkeydown = e => {
 };
 
 main();
-
-// updates GameState
-// const update = (input: Input) => (gameState: GameState): void => {
-// 	//console.log(updatePiece(gameState.piece)(input.rotation), gameState);
-// 	// let GS: GameState = Object.assign({}, gameState); // temporarily stores the next game state.
-
-// 	let GS: GameState = cloneDeep(gameState); // temporarily stores the next game state.
-// 	GS.piece = updatePiece(gameState.piece)(input.rotation);
-// 	GS.pos = input.translation(gameState.pos);
-// 	if (collisionDetection(GS)) {
-// 		GS = Object.assign({}, addPieceToGrid(gameState));
-
-// 		const randPiece: Piece =
-// 			PIECE[pieces[Math.floor(Math.random() * pieces.length)]];
-
-// 		gameState.piece = {
-// 			shape: randPiece.shape.map(add({ x: -1.5, y: -1.5 })),
-// 			id: randPiece.id,
-// 			colour: randPiece.colour
-// 		};
-
-// 		gameState.pos = { x: 3.5, y: 0.5 };
-// 		console.log(GS, gameState);
-// 	} else {
-// 		gameState = Object.assign({}, GS);
-// 	}
-// 	GAMESTATE = gameState;
-// 	draw(gameState);
-// };

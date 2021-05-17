@@ -19,7 +19,6 @@ import {
 	rotate180,
 	down
 } from "./reducerHelpers";
-import { updatePiece } from "./Tetris";
 
 // returns a game board of specified size with each value being an empty cell
 export const newGameBoard = (rowLength: number) => (

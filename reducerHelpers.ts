@@ -1,10 +1,10 @@
-import { Transformation, GameState } from "./types";
+import { Transformation, GameState, Piece } from "./types";
 
 import { multiply, add, subtract, rotate, cis } from "./complex";
 import { numFullRows, addPieceToGrid, clearFullRows } from "./collision";
 import { randomPiece, randomBag } from "./random";
 import { calculateLevel, calculateScore } from "./scoring";
-import { STARTINGPOS } from "./constants";
+import { STARTINGPOS, PIECE } from "./constants";
 
 // key press handling
 export const rotateClockwise: Transformation = multiply({ x: 0, y: 1 });
@@ -22,6 +22,21 @@ export const moveRight = (state: GameState): GameState => ({
 	...state,
 	pos: right(state.pos)
 }); // TODO: make sure this isn't an unnecessary abstraction
+export const rotatePieceClockwise = (piece: Piece): Piece => ({
+	...updatePiece(piece)(rotateClockwise),
+	rotationState: (piece.rotationState + 1) % 4
+});
+export const rotatePieceAntiClockwise = (piece: Piece): Piece => ({
+	...updatePiece(piece)(rotateAntiClockwise),
+	rotationState: (piece.rotationState + 3) % 4
+});
+
+export const updatePiece = (piece: Piece) => (
+	transformation: Transformation
+): Piece => ({
+	...piece,
+	shape: piece.shape.map(transformation)
+});
 
 export const settlePiece = (state: GameState): GameState => {
 	const numLinesCleared = numFullRows(addPieceToGrid(state).board);
