@@ -50,7 +50,9 @@ import {
 	down,
 	rotateAntiClockwise,
 	rotateClockwise,
-	settlePiece
+	settlePiece,
+	moveLeft,
+	moveRight
 } from "./reducerHelpers";
 import { ConsoleWriter } from "istanbul-lib-report";
 
@@ -86,22 +88,19 @@ type GameAction =
 const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 	switch (action) {
 		case "MOVE-LEFT": {
-			const newState = { ...state, pos: left(state.pos) };
-			if (!state.paused) {
-				return pieceCollided(newState) ? state : newState;
-			}
-			return state;
+			if (state.paused) return state;
+			const newState = moveLeft(state);
+			return pieceCollided(newState) ? state : newState;
 		}
 
 		case "MOVE-RIGHT": {
-			const newState = { ...state, pos: right(state.pos) };
-			if (!state.paused) {
-				return pieceCollided(newState) ? state : newState;
-			}
-			return state;
+			if (state.paused) return state;
+			const newState = moveRight(state);
+			return pieceCollided(newState) ? state : newState;
 		}
 
 		case "SOFT-DROP": {
+			if (state.paused) return state;
 			const newState = { ...state, pos: down(state.pos) };
 			if (pieceCollided(newState)) {
 				if (failed(state)) {
@@ -109,16 +108,18 @@ const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 				}
 				return settlePiece(state);
 			}
-			return !state.paused ? newState : state;
+			return newState;
 		}
 		case "HARD-DROP": {
+			if (state.paused) return state;
 			const newState = hardDrop(state);
 			if (failed(newState)) {
 				return resetGameState();
 			}
-			return !state.paused ? settlePiece(newState) : state;
+			return settlePiece(newState);
 		}
 		case "ROTATE-ANTICLOCKWISE": {
+			if (state.paused) return state;
 			const newState = {
 				...state,
 				piece: {
@@ -127,15 +128,13 @@ const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 				}
 			};
 			const WallKick = wallKick(newState)(state.piece.rotationState);
-			if (!state.paused) {
-				return WallKick == null
-					? state
-					: { ...newState, pos: add(WallKick)(newState.pos) };
-			}
-			return state;
+			return WallKick == null
+				? state
+				: { ...newState, pos: add(WallKick)(newState.pos) };
 		}
 
 		case "ROTATE-CLOCKWISE": {
+			if (state.paused) return state;
 			const newState = {
 				...state,
 				piece: {
@@ -144,12 +143,9 @@ const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 				}
 			};
 			const WallKick = wallKick(newState)(state.piece.rotationState);
-			if (!state.paused) {
-				return WallKick == null
-					? state
-					: { ...newState, pos: add(WallKick)(newState.pos) };
-			}
-			return state;
+			return WallKick == null
+				? state
+				: { ...newState, pos: add(WallKick)(newState.pos) };
 		}
 
 		case "PAUSE":
