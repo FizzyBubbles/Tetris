@@ -77,7 +77,8 @@ const resetGameState = (): GameState => {
 		board: newGameBoard(10)(20),
 		tick: 0,
 		paused: false,
-		holdPiece: "empty"
+		holdPiece: "empty",
+		holdFresh: true
 	});
 };
 
@@ -103,6 +104,8 @@ const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 					add(state.piece.rotationalCentre)
 				)
 			};
+			if (!state.holdFresh || state.paused) return state;
+
 			if (state.holdPiece == "empty") {
 				const nextPiece = state.queue[0];
 				const nextQueue = state.queue.slice(1);
@@ -114,7 +117,8 @@ const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 					piece: {
 						...nextPiece,
 						shape: nextPiece.shape.map(subtract(nextPiece.rotationalCentre))
-					}
+					},
+					holdFresh: false
 				};
 				return nextState;
 			} else {
@@ -126,7 +130,8 @@ const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 					piece: {
 						...nextPiece,
 						shape: nextPiece.shape.map(subtract(nextPiece.rotationalCentre))
-					}
+					},
+					holdFresh: false
 				};
 				return nextState;
 			}
@@ -150,7 +155,7 @@ const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 				if (failed(newState)) {
 					return resetGameState();
 				}
-				return settlePiece(state);
+				return { ...settlePiece(state), holdFresh: true };
 			}
 			return newState;
 		}
@@ -161,7 +166,7 @@ const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 			if (failed(newState)) {
 				return resetGameState();
 			}
-			return settlePiece(newState);
+			return { ...settlePiece(newState), holdFresh: true };
 		}
 
 		case "ROTATE-ANTICLOCKWISE": {
@@ -210,7 +215,7 @@ const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 					if (failed(newState)) {
 						return resetGameState();
 					}
-					return { ...settlePiece(state), tick: 0 };
+					return { ...settlePiece(state), tick: 0, holdFresh: true };
 				}
 				return newState;
 			}
@@ -328,9 +333,11 @@ document.onkeydown = e => {
 		case KeyBindings.reset:
 			tetrisStore.dispatch("RESET");
 			break;
+
 		case KeyBindings.pause1:
 			tetrisStore.dispatch("PAUSE");
 			break;
+
 		case KeyBindings.pause2:
 			tetrisStore.dispatch("PAUSE");
 			break;

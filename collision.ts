@@ -127,7 +127,7 @@ export const clearFullRows = (board: GameBoard): GameBoard => {
 
 export const numFullRows = (board: GameBoard) =>
 	fullRows(board).reduce(
-		(accumulator, currentValue) => accumulator + currentValue,
+		(accumulator, currentValue) => accumulator + (currentValue ? 1 : 0),
 		0
 	);
 
@@ -135,7 +135,9 @@ export const addPieceToGrid = (gameState: GameState): GameState => {
 	let GS = cloneDeep(gameState);
 
 	relativePos(GS.piece)(GS.pos).forEach(square => {
-		GS.board[Math.trunc(square.y)][Math.trunc(square.x)] = GS.piece.id;
+		if (Math.trunc(square.y) >= 0 && Math.trunc(square.x) >= 0) {
+			GS.board[Math.trunc(square.y)][Math.trunc(square.x)] = GS.piece.id;
+		}
 	});
 	return GS;
 };

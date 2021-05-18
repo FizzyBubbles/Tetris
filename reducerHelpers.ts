@@ -58,7 +58,6 @@ export const resetPieceRotation = (piece: Piece): Piece => {
 			basePiece = rotatePieceClockwise(piece);
 			break;
 	}
-	console.log(basePiece);
 	return basePiece;
 };
 
