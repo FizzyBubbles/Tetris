@@ -169,5 +169,6 @@ export const NewGameState: GameState = {
 	tick: 0,
 	paused: false,
 	holdPiece: "empty",
-	holdFresh: true
+	holdFresh: true,
+	fail: false
 };

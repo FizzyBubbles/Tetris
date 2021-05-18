@@ -118,7 +118,7 @@ export const drawGrid = (grid: GameBoard): void => {
 	);
 };
 
-const drawPauseShadow = (paused: Boolean): void => {
+export const drawPauseShadow = (paused: Boolean): void => {
 	if (!gameBoardContext || !queueContext || !holdContext) return;
 	if (paused) {
 		// gameBoardContext.filter = "blur(2px)";
@@ -134,6 +134,37 @@ const drawPauseShadow = (paused: Boolean): void => {
 			"PAUSED",
 			gameCanvas.width / 2,
 			gameCanvas.height / 3
+		);
+	} else {
+		gameBoardContext.filter = "none";
+		queueContext.filter = "none";
+		holdContext.filter = "none";
+	}
+};
+
+export const drawFailScreen = (state: GameState): void => {
+	if (!gameBoardContext || !queueContext || !holdContext) return;
+	const fail = state.fail;
+	if (fail) {
+		// gameBoardContext.filter = "blur(2px)";
+		gameBoardContext.fillStyle = "#29292990";
+		gameBoardContext.fillRect(0, 0, gameCanvas.width, gameCanvas.height);
+
+		queueContext.filter = "blur(50px)";
+		holdContext.filter = "blur(50px)";
+		gameBoardContext.font = "50px Helvetica";
+		gameBoardContext.fillStyle = "red";
+		gameBoardContext.textAlign = "center";
+		gameBoardContext.fillText(
+			"FAILED",
+			gameCanvas.width / 2,
+			gameCanvas.height / 3
+		);
+		gameBoardContext.fillStyle = "white";
+		gameBoardContext.fillText(
+			state.score.toString(),
+			gameCanvas.width / 2,
+			gameCanvas.height / 2
 		);
 	} else {
 		gameBoardContext.filter = "none";

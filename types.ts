@@ -36,6 +36,7 @@ export type GameState = {
 	paused: Boolean;
 	holdPiece: Piece | "empty";
 	holdFresh: Boolean;
+	fail: Boolean;
 };
 
 export type Input = {

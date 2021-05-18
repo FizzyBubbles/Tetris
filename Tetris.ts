@@ -28,7 +28,8 @@ import {
 	fillQueue,
 	fillHold,
 	drawPieceHold,
-	holdCanvas
+	holdCanvas,
+	drawFailScreen
 } from "./drawUtils";
 import {
 	pieceCollided,
@@ -78,7 +79,8 @@ const resetGameState = (): GameState => {
 		tick: 0,
 		paused: false,
 		holdPiece: "empty",
-		holdFresh: true
+		holdFresh: true,
+		fail: false
 	});
 };
 
@@ -104,7 +106,7 @@ const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 					add(state.piece.rotationalCentre)
 				)
 			};
-			if (!state.holdFresh || state.paused) return state;
+			if (!state.holdFresh || state.paused || state.fail) return state;
 
 			if (state.holdPiece == "empty") {
 				const nextPiece = state.queue[0];
@@ -137,19 +139,19 @@ const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 			}
 		}
 		case "MOVE-LEFT": {
-			if (state.paused) return state; // returns state if paused
+			if (state.paused || state.fail) return state; // returns state if paused
 			const newState = moveLeft(state);
 			return pieceCollided(newState) ? state : newState;
 		}
 
 		case "MOVE-RIGHT": {
-			if (state.paused) return state; // returns state if paused
+			if (state.paused || state.fail) return state; // returns state if paused
 			const newState = moveRight(state);
 			return pieceCollided(newState) ? state : newState;
 		}
 
 		case "SOFT-DROP": {
-			if (state.paused) return state; // returns state if paused
+			if (state.paused || state.fail) return state; // returns state if paused
 			const newState = { ...state, pos: down(state.pos) };
 			if (pieceCollided(newState)) {
 				if (failed(newState)) {
@@ -161,16 +163,16 @@ const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 		}
 
 		case "HARD-DROP": {
-			if (state.paused) return state; // returns state if paused
+			if (state.paused || state.fail) return state; // returns state if paused
 			const newState = hardDrop(state);
 			if (failed(newState)) {
-				return resetGameState();
+				return { ...newState, fail: true };
 			}
 			return { ...settlePiece(newState), holdFresh: true };
 		}
 
 		case "ROTATE-ANTICLOCKWISE": {
-			if (state.paused) return state; // returns state if paused
+			if (state.paused || state.fail) return state; // returns state if paused
 			const newState = {
 				...state,
 				piece: rotatePieceAntiClockwise(state.piece)
@@ -186,7 +188,7 @@ const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 		}
 
 		case "ROTATE-CLOCKWISE": {
-			if (state.paused) return state; // returns state if paused
+			if (state.paused || state.fail) return state; // returns state if paused
 			const newState = {
 				...state,
 				piece: rotatePieceClockwise(state.piece)
@@ -202,10 +204,10 @@ const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 		}
 
 		case "PAUSE":
-			return { ...state, paused: !state.paused };
+			return state.fail ? state : { ...state, paused: !state.paused };
 
 		case "CLOCK-TICK": {
-			if (state.paused) return state;
+			if (state.paused || state.fail) return state;
 			const newState = { ...state, pos: down(state.pos), tick: 0 };
 			if (
 				state.tick >=
@@ -213,7 +215,7 @@ const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 			) {
 				if (pieceCollided(newState)) {
 					if (failed(newState)) {
-						return resetGameState();
+						return { ...newState, fail: true };
 					}
 					return { ...settlePiece(state), tick: 0, holdFresh: true };
 				}
@@ -280,6 +282,9 @@ const main = () => {
 			drawPieceHold(gameState.holdPiece)({ x: 1, y: 2 });
 		}
 	};
+	const drawFail = (gameState: GameState): void => {
+		drawFailScreen(gameState);
+	};
 
 	tetrisStore.subscribe(writeScore);
 	tetrisStore.subscribe(writeLevel);
@@ -287,6 +292,7 @@ const main = () => {
 	tetrisStore.subscribe(drawState);
 	tetrisStore.subscribe(drawQueue);
 	tetrisStore.subscribe(drawHold);
+	tetrisStore.subscribe(drawFail);
 };
 
 const loop = (timestamp: number) => {
