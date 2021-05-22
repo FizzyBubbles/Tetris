@@ -13,6 +13,7 @@ export let queueContext = queueCanvas.getContext("2d");
 // Hold canvas references
 export let holdCanvas = document.getElementById("hold") as HTMLCanvasElement;
 export let holdContext = holdCanvas.getContext("2d");
+
 // draw square
 export const drawSquareGameBoard = (colour: string) => (
 	position: Complex
@@ -27,6 +28,13 @@ export const drawSquareGameBoard = (colour: string) => (
 		WIDTH,
 		HEIGHT
 	);
+	// gameBoardContext.strokeStyle = colour == "#000000" ? colour : "white";
+	// gameBoardContext.strokeRect(
+	// 	position.x * WIDTH,
+	// 	position.y * HEIGHT,
+	// 	WIDTH,
+	// 	HEIGHT
+	// );
 };
 
 export const drawSquareQueue = (colour: string) => (

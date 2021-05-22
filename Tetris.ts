@@ -1,14 +1,22 @@
 import { cloneDeep } from "lodash";
+import { makeStore } from "./tetris_modules/reduxSystem";
 import {
 	PIECES,
 	CELL,
 	COLOURSCHEME,
 	PIECE,
-	KeyBindings,
+	keyBindings,
 	STARTINGPOS,
 	NewGameState
-} from "./constants";
-import { add, multiply, cis, rotate, ID, subtract } from "./complex";
+} from "./tetris_modules/constants";
+import {
+	add,
+	multiply,
+	cis,
+	rotate,
+	ID,
+	subtract
+} from "./tetris_modules/complex";
 import {
 	Complex,
 	Piece,
@@ -16,7 +24,7 @@ import {
 	Transformation,
 	GameBoard,
 	GameState
-} from "./types";
+} from "./tetris_modules/types";
 import {
 	drawSquareGameBoard,
 	drawPieceGameBoard,
@@ -30,24 +38,21 @@ import {
 	drawPieceHold,
 	holdCanvas,
 	drawFailScreen
-} from "./drawUtils";
+} from "./tetris_modules/drawUtils";
 import {
 	pieceCollided,
 	addPieceToGrid,
 	fullRows,
-	clearLine,
-	clearFullRows,
-	emptyRow,
 	newGameBoard,
 	numFullRows,
 	failed,
 	wallKick,
 	hardDrop
-} from "./collision";
+} from "./tetris_modules/collision";
 import { stat } from "fs";
-import { calculateLevel, calculateScore } from "./scoring";
+import { calculateLevel, calculateScore } from "./tetris_modules/scoring";
 import { statement } from "@babel/template";
-import { randomPiece, randomBag } from "./random";
+import { randomPiece, randomBag } from "./tetris_modules/random";
 import {
 	left,
 	right,
@@ -60,7 +65,7 @@ import {
 	rotatePieceAntiClockwise,
 	rotatePieceClockwise,
 	resetPieceRotation
-} from "./reducerHelpers";
+} from "./tetris_modules/reducerHelpers";
 import { ConsoleWriter } from "istanbul-lib-report";
 
 const resetGameState = (): GameState => {
@@ -100,13 +105,15 @@ const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 	switch (action) {
 		case "HOLD": {
 			// TODO: figure out what the fuck you are doing here
+
+			if (!state.holdFresh || state.paused || state.fail) return state;
+
 			const nextHold = {
 				...resetPieceRotation(state.piece),
 				shape: resetPieceRotation(state.piece).shape.map(
 					add(state.piece.rotationalCentre)
 				)
 			};
-			if (!state.holdFresh || state.paused || state.fail) return state;
 
 			if (state.holdPiece == "empty") {
 				const nextPiece = state.queue[0];
@@ -230,35 +237,12 @@ const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 	}
 };
 
-const makeStore = <State, Action>(
-	reducer: (state: State, action: Action) => State,
-	initialState: State
-): {
-	state: State;
-	dispatch: (action: Action) => void;
-	subscribe: (listener: (state: State) => void) => void;
-} => {
-	let state = initialState;
-	let listeners: ((state: State) => void)[] = [];
-
-	const subscribe = (listener: (state: State) => void) => {
-		listeners = [...listeners, listener];
-	};
-	const dispatch = (action: Action) => {
-		// console.log("dispatched action", action);
-		const newState = reducer(state, action);
-		state = newState;
-		listeners.forEach(listener => listener(state));
-	};
-
-	return { state, dispatch, subscribe };
-};
-
 const tetrisStore = makeStore(tetrisReducer, resetGameState());
 
 const main = () => {
+	// listeners
 	const drawState = (tetrisState: GameState) => {
-		draw(tetrisState);
+		draw(tetrisState); // draws the board
 	};
 	const writeScore = (gameState: GameState): void => {
 		document.getElementById("score").innerHTML = "Score: " + gameState.score;
@@ -272,8 +256,8 @@ const main = () => {
 	};
 	const drawQueue = (gameState: GameState): void => {
 		fillQueue(COLOURSCHEME[0]);
-		gameState.queue.forEach((p, i) =>
-			drawPieceQueue(p)({ x: 1, y: i * 3 + 2 })
+		gameState.queue.forEach((piece, queuePlacement) =>
+			drawPieceQueue(piece)({ x: 1, y: queuePlacement * 3 + 2 })
 		);
 	};
 	const drawHold = (gameState: GameState): void => {
@@ -304,47 +288,47 @@ window.requestAnimationFrame(loop);
 
 document.onkeydown = e => {
 	switch (e.which) {
-		case KeyBindings.left:
+		case keyBindings.left:
 			tetrisStore.dispatch("MOVE-LEFT");
 			break;
 
-		case KeyBindings.right:
+		case keyBindings.right:
 			tetrisStore.dispatch("MOVE-RIGHT");
 			break;
 
-		case KeyBindings.rotateClockwise1:
+		case keyBindings.rotateClockwise1:
 			tetrisStore.dispatch("ROTATE-CLOCKWISE");
 			break;
 
-		case KeyBindings.rotateClockwise2:
+		case keyBindings.rotateClockwise2:
 			tetrisStore.dispatch("ROTATE-CLOCKWISE");
 			break;
 
-		case KeyBindings.rotateAntiClockwise:
+		case keyBindings.rotateAntiClockwise:
 			tetrisStore.dispatch("ROTATE-ANTICLOCKWISE");
 			break;
 
-		case KeyBindings.softDrop:
+		case keyBindings.softDrop:
 			tetrisStore.dispatch("SOFT-DROP");
 			break;
 
-		case KeyBindings.hardDrop:
+		case keyBindings.hardDrop:
 			tetrisStore.dispatch("HARD-DROP");
 			break;
 
-		case KeyBindings.hold:
+		case keyBindings.hold:
 			tetrisStore.dispatch("HOLD");
 			break;
 
-		case KeyBindings.reset:
+		case keyBindings.reset:
 			tetrisStore.dispatch("RESET");
 			break;
 
-		case KeyBindings.pause1:
+		case keyBindings.pause1:
 			tetrisStore.dispatch("PAUSE");
 			break;
 
-		case KeyBindings.pause2:
+		case keyBindings.pause2:
 			tetrisStore.dispatch("PAUSE");
 			break;
 	}

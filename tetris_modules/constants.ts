@@ -2,7 +2,7 @@ import { newGameBoard } from "./collision";
 import { GameState, Piece, PieceName } from "./types";
 import { randomPieces, randomBag, randomPiece } from "./random";
 
-export const KeyBindings = {
+export const keyBindings = {
 	left: 85,
 	right: 48,
 	rotateClockwise1: 70,

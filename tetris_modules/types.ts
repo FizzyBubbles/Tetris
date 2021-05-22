@@ -1,3 +1,6 @@
+import { type } from "os";
+import { NumericDictionary } from "lodash";
+
 //complex number
 export type Complex = {
 	x: number; // real part
@@ -24,6 +27,18 @@ export type Piece = {
 	rotationalCentre: Complex;
 };
 
+export type KeyBinding = {
+	left: number;
+	right: number;
+	rotateClockwise: number;
+	rotateAntiClockwise: number;
+	softDrop: number;
+	hardDrop: number;
+	hold: number;
+	reset: number;
+	pause: number;
+};
+
 export type GameState = {
 	queue: Piece[];
 	cummulativeLineClears: number;
@@ -37,6 +52,14 @@ export type GameState = {
 	holdPiece: Piece | "empty";
 	holdFresh: Boolean;
 	fail: Boolean;
+};
+
+export type randomSystem = "7-BAG" | "COMPLETELY-RANDOMISED";
+
+export type Settings = {
+	holdActive: boolean;
+	randomChoice: randomSystem;
+	keyBindings: KeyBinding;
 };
 
 export type Input = {

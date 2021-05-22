@@ -12,9 +12,9 @@ export const add = (n1: Complex) => (n2: Complex): Complex => ({
 export const subtract = (difference: Complex) => (
 	number: Complex
 ): Complex => ({
-	x: Number((number.x - difference.x).toFixed(5)),
+	x: Number((number.x - difference.x).toFixed(3)),
 
-	y: Number((number.y - difference.y).toFixed(5))
+	y: Number((number.y - difference.y).toFixed(3))
 });
 
 // multiplies two complex numbers -> This is the expanded form of (a+bi)(c+di)

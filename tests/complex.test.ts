@@ -1,8 +1,8 @@
-import { Complex } from "./types";
+import { Complex } from "../tetris_modules/types";
 const sum = (x: number, y: number) => {
 	return x + y;
 };
-import { add, multiply, subtract } from "./complex";
+import { add, multiply, subtract } from "../tetris_modules/complex";
 
 describe("add", () => {
 	it("should add together two complex vectors X components and their Y components", () => {
