@@ -3,31 +3,31 @@ import diff from "jest-diff";
 
 // adds two complex numbers
 export const add = (n1: Complex) => (n2: Complex): Complex => ({
-	x: n1.x + n2.x,
+	x: Number((n1.x + n2.x).toFixed(5)),
 
-	y: n1.y + n2.y
+	y: Number((n1.y + n2.y).toFixed(5))
 });
 
 // stubtracts a number from another
 export const subtract = (difference: Complex) => (
 	number: Complex
 ): Complex => ({
-	x: number.x - difference.x,
+	x: Number((number.x - difference.x).toFixed(5)),
 
-	y: number.y - difference.y
+	y: Number((number.y - difference.y).toFixed(5))
 });
 
 // multiplies two complex numbers -> This is the expanded form of (a+bi)(c+di)
 export const multiply = (n1: Complex) => (n2: Complex): Complex => ({
-	x: n1.x * n2.x - n1.y * n2.y,
+	x: Number((n1.x * n2.x - n1.y * n2.y).toFixed(5)),
 
-	y: n1.y * n2.x + n1.x * n2.y
+	y: Number((n1.y * n2.x + n1.x * n2.y).toFixed(5))
 });
 
 // takes an angle in radians and returns the complex unit vector in that angle
 export const cis = (angle: number): Complex => ({
-	x: Math.cos(angle),
-	y: Math.sin(angle)
+	x: Number(Math.cos(angle).toFixed(5)),
+	y: Number(Math.sin(angle).toFixed(5))
 });
 
 // rotates by whatever angle given (in radians)
