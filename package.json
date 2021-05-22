@@ -19,6 +19,7 @@
 		"webpack-cli": "^4.3.0"
 	},
 	"scripts": {
-		"dev": "webpack --watch --config webpack.config.js"
+		"dev": "webpack --watch --config webpack.config.js",
+		"test": "jest"
 	}
 }
