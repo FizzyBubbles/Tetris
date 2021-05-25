@@ -100,9 +100,7 @@ export const emptyRow = (length: number) => {
 	}
 	return row;
 };
-// Array(length).fill(CELL.EMPTY);
-// creates empty row
-// concat
+
 export const fullRows = (board: GameBoard): boolean[] =>
 	board.map(row => rowIsFull(row));
 
@@ -317,7 +315,6 @@ export const wallKick = (state: GameState) => (
 				break;
 		}
 	}
-	console.log(adjustment);
 	return adjustment;
 };
 

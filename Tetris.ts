@@ -3,11 +3,10 @@ import { makeStore } from "./tetris_modules/reduxSystem";
 import {
 	PIECES,
 	CELL,
-	COLOURSCHEME,
-	PIECE,
-	keyBindings,
-	STARTINGPOS,
-	NewGameState
+	NewGameState,
+	KEYBINDINGS,,
+	STARTINGPOS
+	COLOURSCHEME
 } from "./tetris_modules/constants";
 import {
 	add,
@@ -288,47 +287,47 @@ window.requestAnimationFrame(loop);
 
 document.onkeydown = e => {
 	switch (e.which) {
-		case keyBindings.left:
+		case KEYBINDINGS.left:
 			tetrisStore.dispatch("MOVE-LEFT");
 			break;
 
-		case keyBindings.right:
+		case KEYBINDINGS.right:
 			tetrisStore.dispatch("MOVE-RIGHT");
 			break;
 
-		case keyBindings.rotateClockwise1:
+		case KEYBINDINGS.rotateClockwise1:
 			tetrisStore.dispatch("ROTATE-CLOCKWISE");
 			break;
 
-		case keyBindings.rotateClockwise2:
+		case KEYBINDINGS.rotateClockwise2:
 			tetrisStore.dispatch("ROTATE-CLOCKWISE");
 			break;
 
-		case keyBindings.rotateAntiClockwise:
+		case KEYBINDINGS.rotateAntiClockwise:
 			tetrisStore.dispatch("ROTATE-ANTICLOCKWISE");
 			break;
 
-		case keyBindings.softDrop:
+		case KEYBINDINGS.softDrop:
 			tetrisStore.dispatch("SOFT-DROP");
 			break;
 
-		case keyBindings.hardDrop:
+		case KEYBINDINGS.hardDrop:
 			tetrisStore.dispatch("HARD-DROP");
 			break;
 
-		case keyBindings.hold:
+		case KEYBINDINGS.hold:
 			tetrisStore.dispatch("HOLD");
 			break;
 
-		case keyBindings.reset:
+		case KEYBINDINGS.reset:
 			tetrisStore.dispatch("RESET");
 			break;
 
-		case keyBindings.pause1:
+		case KEYBINDINGS.pause1:
 			tetrisStore.dispatch("PAUSE");
 			break;
 
-		case keyBindings.pause2:
+		case KEYBINDINGS.pause2:
 			tetrisStore.dispatch("PAUSE");
 			break;
 	}
