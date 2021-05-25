@@ -5,7 +5,7 @@ export const calculateScore = (numLinesCleared: number) => (level: number) => {
 	// 	numLinesCleared > 0 ? (level + 1) * scoreTable[numLinesCleared - 1] : 0
 	// );
 	return numLinesCleared > 0
-		? (level + 1) * scoreTable[numLinesCleared - 1]
+		? (level + 1) * scoreTable[numLinesCleared - (1 % 4)]
 		: 0;
 };
 
