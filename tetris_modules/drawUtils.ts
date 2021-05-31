@@ -164,7 +164,7 @@ export const drawFailScreen = (state: GameState): void => {
 		gameBoardContext.fillStyle = "red";
 		gameBoardContext.textAlign = "center";
 		gameBoardContext.fillText(
-			"FAILED",
+			"U ARE DIE",
 			gameCanvas.width / 2,
 			gameCanvas.height / 3
 		);

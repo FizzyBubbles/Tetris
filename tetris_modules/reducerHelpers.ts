@@ -2,7 +2,7 @@ import { Transformation, GameState, Piece } from "./types";
 
 import { multiply, add, subtract, rotate, cis } from "./complex";
 import { numFullRows, addPieceToGrid, clearFullRows } from "./collision";
-import { randomPiece, randomBag } from "./random";
+import { randomPiece, random7Bag } from "./random";
 import { calculateLevel, calculateScore } from "./scoring";
 import { STARTINGPOS, PIECE } from "./constants";
 
@@ -73,7 +73,7 @@ export const settlePiece = (state: GameState): GameState => {
 		...state,
 		queue:
 			state.queue.length <= 7
-				? [...state.queue.slice(1), ...randomBag()]
+				? [...state.queue.slice(1), ...random7Bag()]
 				: state.queue.slice(1),
 		cummulativeLineClears: state.cummulativeLineClears + numLinesCleared,
 		level: calculateLevel(state.cummulativeLineClears),

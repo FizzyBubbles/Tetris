@@ -38,17 +38,35 @@
 			max-width: 200px;
 			color: white;
 		}
+		input {
+			color: black ;
+			padding: 15px 100px;
+			margin: 10px 4px;
+			cursor: pointer;
+			text-transform: uppercase;
+			text-align: left;
+			position: absolute;
+			right: 0%;
+			top: 0%;
+		}
+		input:hover {
+			opacity: 0.5;
+		}
 	</style>
 	<head> </head>
 	<body>
 		<div id="container">
-			<div id="statBox">
-				<div id="score"></div>
-				<div id="level"></div>
-				<div id="linesCleared"></div>
-			</div>
+			<input type="button" id="settings" value="settings"></input>
 			<div id="gameDiv">
-				<canvas id="hold" width="210" height="140"></canvas>
+				<div id="LHS">
+					<canvas id="hold" width="210" height="140"></canvas>
+					<br />
+					<div id="statBox">
+						<div id="score"></div>
+						<div id="level"></div>
+						<div id="linesCleared"></div>
+					</div>
+				</div>
 				<canvas id="board" width="350" height="700"></canvas>
 				<canvas id="queue" width="210" height="560"></canvas>
 			</div>

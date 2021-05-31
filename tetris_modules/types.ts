@@ -1,3 +1,4 @@
+import { Settings } from "./../types";
 import { type } from "os";
 import { NumericDictionary } from "lodash";
 
@@ -52,6 +53,7 @@ export type GameState = {
 	holdPiece: Piece | "empty";
 	holdFresh: Boolean;
 	fail: Boolean;
+	settings: Settings;
 };
 
 export type randomSystem = "7-BAG" | "COMPLETELY-RANDOMISED";

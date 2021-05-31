@@ -3,17 +3,19 @@ import { PIECES, PIECE } from "./constants";
 import { cloneDeep } from "lodash";
 
 export const randomPiece = (): Piece =>
-	PIECES[Math.trunc(Math.random() * PIECES.length)];
+	PIECES[Math.trunc(Math.random() * PIECES.length)]; // picks a random piece from the PIECES array
 
+// generates an array of random pieces at a specified length
 export const randomPieces = (numberOfRandomPieces: number): Piece[] => {
-	let output = [];
+	let output: Piece[] = []; // stores the random pieces
 	for (let i = 0; i < numberOfRandomPieces; i++) {
-		output.push(randomPiece());
+		output.push(randomPiece()); // adds the number of random pieces to the output
 	}
 	return output;
 };
 
+// shuffles an array of Pieces
 const shuffle = (pieces: Piece[]) =>
-	cloneDeep(pieces).sort(() => Math.random() - 0.5);
+	cloneDeep(pieces).sort(() => Math.random() - 0.5); // clone deep gets past the object pointers, and the sort function places each element at a random location.
 
-export const randomBag = (): Piece[] => shuffle(PIECES);
+export const random7Bag = (): Piece[] => shuffle(PIECES); // returns a shuffled bag of all the pieces

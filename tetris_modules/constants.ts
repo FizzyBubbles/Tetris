@@ -1,19 +1,24 @@
+import { Settings } from "./types";
 import { newGameBoard } from "./collision";
 import { GameState, Piece, PieceName } from "./types";
-import { randomPieces, randomBag, randomPiece } from "./random";
+import { randomPieces, random7Bag, randomPiece } from "./random";
 
-export const KEYBINDINGS = {
+export const tomKEYBINDINGS = {
 	left: 85,
 	right: 48,
-	rotateClockwise1: 70,
-	rotateClockwise2: 88,
+	rotateClockwise: 70,
 	rotateAntiClockwise: 83,
 	softDrop: 57,
 	hardDrop: 32,
 	hold: 68,
 	reset: 82,
-	pause1: 80,
-	pause2: 27
+	pause: 27
+};
+
+export const TomSettings: Settings = {
+	holdActive: true,
+	randomChoice: "7-BAG",
+	keyBindings: tomKEYBINDINGS
 };
 
 // export const KeyBindings = {
@@ -160,7 +165,7 @@ export const STARTINGPOS = { x: 3, y: -1 };
 
 // whole game state
 export const NewGameState: GameState = {
-	queue: randomBag(),
+	queue: random7Bag(),
 	cummulativeLineClears: 0,
 	level: 0,
 	score: 0,
@@ -171,5 +176,6 @@ export const NewGameState: GameState = {
 	paused: false,
 	holdPiece: "empty",
 	holdFresh: true,
-	fail: false
+	fail: false,
+	settings: TomSettings
 };

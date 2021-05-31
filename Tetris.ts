@@ -1,11 +1,12 @@
+import { keyBindings } from "./constants";
 import { cloneDeep } from "lodash";
 import { makeStore } from "./tetris_modules/reduxSystem";
 import {
 	PIECES,
 	CELL,
 	NewGameState,
-	KEYBINDINGS,,
-	STARTINGPOS
+	STARTINGPOS,
+	TomSettings,
 	COLOURSCHEME
 } from "./tetris_modules/constants";
 import {
@@ -51,7 +52,7 @@ import {
 import { stat } from "fs";
 import { calculateLevel, calculateScore } from "./tetris_modules/scoring";
 import { statement } from "@babel/template";
-import { randomPiece, randomBag } from "./tetris_modules/random";
+import { randomPiece, random7Bag } from "./tetris_modules/random";
 import {
 	left,
 	right,
@@ -70,7 +71,7 @@ import { ConsoleWriter } from "istanbul-lib-report";
 const resetGameState = (): GameState => {
 	const firstPiece = randomPiece();
 	return cloneDeep({
-		queue: randomBag(),
+		queue: random7Bag(),
 		cummulativeLineClears: 0,
 		level: 0,
 		score: 0,
@@ -84,7 +85,8 @@ const resetGameState = (): GameState => {
 		paused: false,
 		holdPiece: "empty",
 		holdFresh: true,
-		fail: false
+		fail: false,
+		settings: TomSettings
 	});
 };
 
@@ -98,7 +100,8 @@ type GameAction =
 	| "ROTATE-ANTICLOCKWISE"
 	| "PAUSE"
 	| "CLOCK-TICK"
-	| "RESET";
+	| "RESET"
+	| "CHANGE-KEYBINDINGS";
 
 const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 	switch (action) {
@@ -286,6 +289,7 @@ const loop = (timestamp: number) => {
 window.requestAnimationFrame(loop);
 
 document.onkeydown = e => {
+	const KEYBINDINGS = tetrisStore.state.settings.keyBindings;
 	switch (e.which) {
 		case KEYBINDINGS.left:
 			tetrisStore.dispatch("MOVE-LEFT");
@@ -295,11 +299,7 @@ document.onkeydown = e => {
 			tetrisStore.dispatch("MOVE-RIGHT");
 			break;
 
-		case KEYBINDINGS.rotateClockwise1:
-			tetrisStore.dispatch("ROTATE-CLOCKWISE");
-			break;
-
-		case KEYBINDINGS.rotateClockwise2:
+		case KEYBINDINGS.rotateClockwise:
 			tetrisStore.dispatch("ROTATE-CLOCKWISE");
 			break;
 
@@ -323,11 +323,7 @@ document.onkeydown = e => {
 			tetrisStore.dispatch("RESET");
 			break;
 
-		case KEYBINDINGS.pause1:
-			tetrisStore.dispatch("PAUSE");
-			break;
-
-		case KEYBINDINGS.pause2:
+		case KEYBINDINGS.pause:
 			tetrisStore.dispatch("PAUSE");
 			break;
 	}
