@@ -18,7 +18,8 @@ export const tomKEYBINDINGS = {
 export const TomSettings: Settings = {
 	holdActive: true,
 	randomChoice: "7-BAG",
-	keyBindings: tomKEYBINDINGS
+	keyBindings: tomKEYBINDINGS,
+	dropShadow: true
 };
 
 // export const KeyBindings = {
@@ -162,20 +163,3 @@ export const PIECES: Piece[] = [
 ];
 
 export const STARTINGPOS = { x: 3, y: -1 };
-
-// whole game state
-export const NewGameState: GameState = {
-	queue: random7Bag(),
-	cummulativeLineClears: 0,
-	level: 0,
-	score: 0,
-	piece: randomPiece(),
-	pos: STARTINGPOS,
-	board: newGameBoard(10)(20),
-	tick: 0,
-	paused: false,
-	holdPiece: "empty",
-	holdFresh: true,
-	fail: false,
-	settings: TomSettings
-};

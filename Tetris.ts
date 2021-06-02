@@ -3,7 +3,6 @@ import { makeStore } from "./tetris_modules/reduxSystem";
 import {
 	PIECES,
 	CELL,
-	NewGameState,
 	STARTINGPOS,
 	TomSettings,
 	COLOURSCHEME
@@ -271,7 +270,7 @@ const main = () => {
 		drawFailScreen(gameState);
 	};
 	const drawDropShadow = (gameState: GameState): void => {
-		drawPieceDropShadow(gameState);
+		if (tetrisStore.state.settings.dropShadow) drawPieceDropShadow(gameState);
 	};
 	tetrisStore.subscribe(writeScore);
 	tetrisStore.subscribe(writeLevel);

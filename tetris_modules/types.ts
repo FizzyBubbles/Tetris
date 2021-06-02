@@ -58,6 +58,7 @@ export type Settings = {
 	holdActive: boolean;
 	randomChoice: randomSystem;
 	keyBindings: KeyBinding;
+	dropShadow: boolean;
 };
 
 export type Input = {
