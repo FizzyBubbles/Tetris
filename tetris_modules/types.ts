@@ -1,7 +1,3 @@
-import { Settings } from "./../types";
-import { type } from "os";
-import { NumericDictionary } from "lodash";
-
 //complex number
 export type Complex = {
 	x: number; // real part

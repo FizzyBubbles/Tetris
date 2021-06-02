@@ -1,3 +1,4 @@
+import { hardDrop } from "./collision";
 import { Piece, Complex, GameBoard, GameState } from "./types";
 import { add } from "./complex";
 import { COLOURSCHEME } from "./constants";
@@ -12,7 +13,7 @@ export let queueContext = queueCanvas.getContext("2d");
 
 // Hold canvas references
 export let holdCanvas = document.getElementById("hold") as HTMLCanvasElement;
-export let holdContext = holdCanvas.getContext("2d");
+let holdContext = holdCanvas.getContext("2d");
 
 // draw square
 export const drawSquareGameBoard = (colour: string) => (
@@ -71,6 +72,19 @@ export const drawPieceGameBoard = (piece: Piece) => (
 	const displace = add(position); // returns a function which displaces the piece by the position
 
 	piece.shape.forEach(cell => {
+		colourSquare(displace(cell));
+	}); // draws each cell in its location
+	//drawPoint("b")(position);
+};
+
+export const drawPieceDropShadow = (gameState: GameState): void => {
+	const state = hardDrop(gameState);
+	const colour = [state.piece.colour.slice(0), "46"].join("");
+	const colourSquare = drawSquareGameBoard(colour); // returns a function that draws a square with the colour of the piece
+
+	const displace = add(state.pos); // returns a function which displaces the piece by the hard drop position
+
+	state.piece.shape.forEach(cell => {
 		colourSquare(displace(cell));
 	}); // draws each cell in its location
 	//drawPoint("b")(position);

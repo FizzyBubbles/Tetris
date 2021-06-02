@@ -1,4 +1,3 @@
-import { keyBindings } from "./constants";
 import { cloneDeep } from "lodash";
 import { makeStore } from "./tetris_modules/reduxSystem";
 import {
@@ -37,7 +36,8 @@ import {
 	fillHold,
 	drawPieceHold,
 	holdCanvas,
-	drawFailScreen
+	drawFailScreen,
+	drawPieceDropShadow
 } from "./tetris_modules/drawUtils";
 import {
 	pieceCollided,
@@ -100,8 +100,7 @@ type GameAction =
 	| "ROTATE-ANTICLOCKWISE"
 	| "PAUSE"
 	| "CLOCK-TICK"
-	| "RESET"
-	| "CHANGE-KEYBINDINGS";
+	| "RESET";
 
 const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 	switch (action) {
@@ -271,7 +270,9 @@ const main = () => {
 	const drawFail = (gameState: GameState): void => {
 		drawFailScreen(gameState);
 	};
-
+	const drawDropShadow = (gameState: GameState): void => {
+		drawPieceDropShadow(gameState);
+	};
 	tetrisStore.subscribe(writeScore);
 	tetrisStore.subscribe(writeLevel);
 	tetrisStore.subscribe(writeLinesCleared);
@@ -279,6 +280,7 @@ const main = () => {
 	tetrisStore.subscribe(drawQueue);
 	tetrisStore.subscribe(drawHold);
 	tetrisStore.subscribe(drawFail);
+	tetrisStore.subscribe(drawDropShadow);
 };
 
 const loop = (timestamp: number) => {
