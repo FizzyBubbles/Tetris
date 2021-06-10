@@ -13,11 +13,18 @@ export type PieceName =
 	| "Z_PIECE"
 	| "T_PIECE";
 
-export type rotationState = 0 | 1 | 2 | 3;
+// export type rotationState = 0 | 1 | 2 | 3;
+
+export enum RotationState {
+	Initial = "Initial",
+	Clockwise = "Clockwise",
+	Flip = "Flip",
+	AntiClockwise = "AntiClockwise"
+}
 
 export type Piece = {
 	id: number;
-	rotationState: number;
+	rotationState: RotationState;
 	name: string;
 	colour: string;
 	shape: Complex[];

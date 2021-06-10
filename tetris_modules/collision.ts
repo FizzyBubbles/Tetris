@@ -1,10 +1,11 @@
+import { statement } from "@babel/template";
 import {
 	Complex,
 	Piece,
 	GameState,
 	GameBoard,
-	rotationState,
-	Transformation
+	Transformation,
+	RotationState
 } from "./types";
 import { gameCanvas } from "./drawUtils";
 import { add, multiply } from "./complex";
@@ -140,8 +141,17 @@ export const addPieceToGrid = (gameState: GameState): GameState => {
 	return GS;
 };
 
-export const wallKick = (state: GameState) => (
-	oldRotationState: number
+/**
+ * This is a curried function that s
+ * A "wallKick" is a
+ * https://tetris.fandom.com/wiki/Wall_kick
+ *
+ * @param state
+ *
+ * @returns new position vector based on the "kick" or null if there is no wall kick
+ */
+export const calculateWallKickPosition = (state: GameState) => (
+	oldRotationState: RotationState
 ): Complex | null => {
 	const tests0_1 = [
 		// tests for state 0 to 1
@@ -274,7 +284,7 @@ export const wallKick = (state: GameState) => (
 		{ x: 2, y: -1 }
 	];
 
-	const test = (testPositions: Complex[]): Complex | null => {
+	const checkWallKick = (testPositions: Complex[]): Complex | null => {
 		for (let i in testPositions) {
 			console.log(testPositions[i]);
 			if (!pieceCollided({ ...state, pos: add(state.pos)(testPositions[i]) })) {
@@ -286,32 +296,56 @@ export const wallKick = (state: GameState) => (
 	let adjustment: Complex | null = { x: 0, y: 0 };
 	if (state.piece.name == "I_PIECE") {
 		switch (state.piece.rotationState) {
-			case 0:
-				adjustment = oldRotationState == 1 ? test(Itests1_0) : test(Itests3_0);
+			case RotationState.Initial:
+				adjustment =
+					oldRotationState == RotationState.Clockwise
+						? checkWallKick(Itests1_0)
+						: checkWallKick(Itests3_0);
 				break;
-			case 1:
-				adjustment = oldRotationState == 0 ? test(Itests0_1) : test(Itests2_1);
+			case RotationState.Clockwise:
+				adjustment =
+					oldRotationState == RotationState.Initial
+						? checkWallKick(Itests0_1)
+						: checkWallKick(Itests2_1);
 				break;
-			case 2:
-				adjustment = oldRotationState == 1 ? test(Itests1_2) : test(Itests3_2);
+			case RotationState.Flip:
+				adjustment =
+					oldRotationState == RotationState.Clockwise
+						? checkWallKick(Itests1_2)
+						: checkWallKick(Itests3_2);
 				break;
-			case 3:
-				adjustment = oldRotationState == 0 ? test(Itests0_3) : test(Itests2_3);
+			case RotationState.AntiClockwise:
+				adjustment =
+					oldRotationState == RotationState.Initial
+						? checkWallKick(Itests0_3)
+						: checkWallKick(Itests2_3);
 				break;
 		}
 	} else {
 		switch (state.piece.rotationState) {
-			case 0:
-				adjustment = oldRotationState == 1 ? test(tests1_0) : test(tests3_0);
+			case RotationState.Initial:
+				adjustment =
+					oldRotationState == RotationState.Clockwise
+						? checkWallKick(tests1_0)
+						: checkWallKick(tests3_0);
 				break;
-			case 1:
-				adjustment = oldRotationState == 0 ? test(tests0_1) : test(tests2_1);
+			case RotationState.Clockwise:
+				adjustment =
+					oldRotationState == RotationState.Initial
+						? checkWallKick(tests0_1)
+						: checkWallKick(tests2_1);
 				break;
-			case 2:
-				adjustment = oldRotationState == 1 ? test(tests1_2) : test(tests3_2);
+			case RotationState.Flip:
+				adjustment =
+					oldRotationState == RotationState.Clockwise
+						? checkWallKick(tests1_2)
+						: checkWallKick(tests3_2);
 				break;
-			case 3:
-				adjustment = oldRotationState == 0 ? test(tests0_3) : test(tests2_3);
+			case RotationState.AntiClockwise:
+				adjustment =
+					oldRotationState == RotationState.Initial
+						? checkWallKick(tests0_3)
+						: checkWallKick(tests2_3);
 				break;
 		}
 	}

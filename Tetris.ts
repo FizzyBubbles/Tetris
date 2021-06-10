@@ -45,7 +45,7 @@ import {
 	newGameBoard,
 	numFullRows,
 	failed,
-	wallKick,
+	calculateWallKickPosition as calculateWallKickDisplacement,
 	hardDrop
 } from "./tetris_modules/collision";
 import { stat } from "fs";
@@ -186,12 +186,14 @@ const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 			};
 
 			// wallKick returns the displacement a piece has based on some tests or null if it fails all tests
-			const WallKick = wallKick(newState)(state.piece.rotationState);
+			const wallKickDisplacement = calculateWallKickDisplacement(newState)(
+				state.piece.rotationState
+			);
 
 			// if no wall kick tests were passed (null) it will not perform the rotation else it will displace the newState by the wallkick
-			return WallKick == null
+			return wallKickDisplacement == null
 				? state
-				: { ...newState, pos: add(WallKick)(newState.pos) };
+				: { ...newState, pos: add(wallKickDisplacement)(newState.pos) };
 		}
 
 		case "ROTATE-CLOCKWISE": {
@@ -202,12 +204,14 @@ const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 			};
 
 			// wallKick returns the displacement a piece has based on some tests or null if it fails all tests
-			const WallKick = wallKick(newState)(state.piece.rotationState);
+			const wallKickDisplacement = calculateWallKickDisplacement(newState)(
+				state.piece.rotationState
+			);
 
 			// if no wall kick tests were passed (null) it will not perform the rotation else it will displace the newState by the wallkick
-			return WallKick == null
+			return wallKickDisplacement == null
 				? state
-				: { ...newState, pos: add(WallKick)(newState.pos) };
+				: { ...newState, pos: add(wallKickDisplacement)(newState.pos) };
 		}
 
 		case "PAUSE":
@@ -239,20 +243,34 @@ const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 
 const tetrisStore = makeStore(tetrisReducer, resetGameState());
 
+const elementMap = (elementId: string) => (
+	elementFunction: (e: HTMLElement) => void
+) => {
+	const element = document.getElementById(elementId);
+	if (!element) return;
+
+	elementFunction(element);
+};
+
+const setElementInnerHTML = (elementId: string) => (content: string) => {
+	elementMap(elementId)(element => (element.innerHTML = content));
+};
+
 const main = () => {
 	// listeners
 	const drawState = (tetrisState: GameState) => {
 		draw(tetrisState); // draws the board
 	};
 	const writeScore = (gameState: GameState): void => {
-		document.getElementById("score").innerHTML = "Score: " + gameState.score;
+		setElementInnerHTML("score")("Score: " + gameState.score);
 	};
 	const writeLevel = (gameState: GameState): void => {
-		document.getElementById("level").innerHTML = "Level: " + gameState.level;
+		setElementInnerHTML("level")("Level: " + gameState.level);
 	};
 	const writeLinesCleared = (gameState: GameState): void => {
-		document.getElementById("linesCleared").innerHTML =
-			"Lines Cleared: " + gameState.cummulativeLineClears;
+		setElementInnerHTML("linesCleared")(
+			"Lines Cleared: " + gameState.cummulativeLineClears
+		);
 	};
 	const drawQueue = (gameState: GameState): void => {
 		fillQueue(COLOURSCHEME[0]);
@@ -331,3 +349,19 @@ document.onkeydown = e => {
 };
 
 main();
+
+/* Set the width of the side navigation to 250px and the left margin of the page content to 250px and add a black background color to body */
+function openNav() {
+	document.getElementById("sideMenu").style.width = "250px";
+	document.getElementById("container").style.marginLeft = "250px";
+	document.body.style.backgroundColor = "rgba(0,0,0,0.4)";
+}
+
+/* Set the width of the side navigation to 0 and the left margin of the page content to 0, and the background color of body to white */
+function closeNav() {
+	document.getElementById("sideMenu").style.width = "0";
+	document.getElementById("container").style.marginLeft = "0";
+	document.body.style.backgroundColor = "white";
+}
+
+document.getElementById("settings").addEventListener("click", openNav);
