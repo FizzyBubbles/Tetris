@@ -1,3 +1,8 @@
+import {
+	getKickRotationState,
+	kickTestPositionsMap,
+	IPieceKickTestPositionsMap
+} from "./kickUtils";
 import { statement } from "@babel/template";
 import {
 	Complex,
@@ -43,16 +48,20 @@ export const newGameBoard = (rowLength: number) => (
 // 	Array(columns).fill(emptyRow(rowLength)); // TODO: describe this (lol this just does everything that happens in the other function)
 
 export const failed = (gameState: GameState): boolean => {
+	// maps the vector with the position vector to give the relative piece location to the board
 	const pieceLocation = relativePos(gameState.piece)(gameState.pos);
 	let failed = false;
 	for (let i = 0; i < pieceLocation.length; i++) {
+		// iterates through each position vector to see if it overlaps with the top of the board
 		if (pieceLocation[i].y < 0) {
 			failed = true;
-			i = pieceLocation.length;
+			i = pieceLocation.length; // ends the loop if failed
 		}
 	}
 	return failed;
 };
+
+// never used
 // checks if two pieces have collided
 export const squareCollision = (position1: Complex) => (position2: Complex) => {
 	if (!gameCanvas) return;
@@ -66,6 +75,7 @@ export const squareCollision = (position1: Complex) => (position2: Complex) => {
 	);
 };
 
+// maps the position to each of the vectors that make up a piece
 export const relativePos = (piece: Piece) => (position: Complex) =>
 	piece.shape.map(blockPosition => add(blockPosition)(position)); // returns the position of all the blocks in a piece plus the position.
 
@@ -94,6 +104,7 @@ export const pieceCollided = (gameState: GameState) => {
 	return collided;
 };
 
+// never used
 export const emptyRow = (length: number) => {
 	let row: number[] = [];
 	for (let i = 0; i < length; i++) {
@@ -102,11 +113,14 @@ export const emptyRow = (length: number) => {
 	return row;
 };
 
+// applies rowIsFull to every row in a GameBoard
 export const fullRows = (board: GameBoard): boolean[] =>
 	board.map(row => rowIsFull(row));
 
+// if a row has no empty cells it will return true
 export const rowIsFull = (row: number[]): boolean => !row.includes(CELL.EMPTY);
 
+// never used
 export const clearLine = (board: GameBoard) => (
 	rowIndex: number
 ): GameBoard => [
@@ -115,11 +129,12 @@ export const clearLine = (board: GameBoard) => (
 	...board.slice(rowIndex + 1)
 ];
 
+// removes all rows that are full and adds empty rows to the top of the board
 export const clearFullRows = (board: GameBoard): GameBoard => {
 	const numberOfRows = board.length;
-	const filteredBoard = board.filter(row => row.includes(CELL.EMPTY));
+	const filteredBoard = board.filter(row => row.includes(CELL.EMPTY)); // removes full rows
 	return [
-		...newGameBoard(10)(numberOfRows - filteredBoard.length),
+		...newGameBoard(10)(numberOfRows - filteredBoard.length), // empty rows
 		...filteredBoard
 	];
 };
@@ -128,11 +143,12 @@ export const numFullRows = (board: GameBoard) =>
 	fullRows(board).reduce(
 		(accumulator, currentValue) => accumulator + (currentValue ? 1 : 0),
 		0
-	);
+	); // uses a reduce function to count the number of full rows on the current game board
 
 export const addPieceToGrid = (gameState: GameState): GameState => {
-	let GS = cloneDeep(gameState);
+	let GS = cloneDeep(gameState); // clones the game state
 
+	// goes through each piece and adds it to whichever square the top left corner of the piece is in
 	relativePos(GS.piece)(GS.pos).forEach(square => {
 		if (Math.trunc(square.y) >= 0 && Math.trunc(square.x) >= 0) {
 			GS.board[Math.trunc(square.y)][Math.trunc(square.x)] = GS.piece.id;
@@ -142,212 +158,45 @@ export const addPieceToGrid = (gameState: GameState): GameState => {
 };
 
 /**
- * This is a curried function that s
+ * This is a curried function that will give you a transformation of
  * A "wallKick" is a
  * https://tetris.fandom.com/wiki/Wall_kick
  *
- * @param state
+ * @param state current game state
+ * @param oldRotationState the old rotation state
  *
  * @returns new position vector based on the "kick" or null if there is no wall kick
  */
 export const calculateWallKickPosition = (state: GameState) => (
 	oldRotationState: RotationState
 ): Complex | null => {
-	const tests0_1 = [
-		// tests for state 0 to 1
-		{ x: 0, y: 0 },
-		{ x: -1, y: 0 },
-		{ x: -1, y: -1 },
-		{ x: 0, y: 2 },
-		{ x: -1, y: 2 }
-	];
-	const tests1_0 = [
-		// tests for state 1 to 0
-		{ x: 0, y: 0 },
-		{ x: 1, y: 0 },
-		{ x: 1, y: 1 },
-		{ x: 0, y: -2 },
-		{ x: 1, y: -2 }
-	];
-	const tests1_2 = [
-		// tests for state 1 to 2
-		{ x: 0, y: 0 },
-		{ x: 1, y: 0 },
-		{ x: 1, y: 1 },
-		{ x: 0, y: -2 },
-		{ x: 1, y: -2 }
-	];
-	const tests2_1 = [
-		// tests for state 2 to 1
-		{ x: 0, y: 0 },
-		{ x: -1, y: 0 },
-		{ x: -1, y: -1 },
-		{ x: 0, y: 2 },
-		{ x: -1, y: 2 }
-	];
-	const tests2_3 = [
-		// tests for state 2 to 3
-		{ x: 0, y: 0 },
-		{ x: 1, y: 0 },
-		{ x: 1, y: -1 },
-		{ x: 0, y: 2 },
-		{ x: 1, y: 2 }
-	];
-	const tests3_2 = [
-		// tests for state 3 to 2
-		{ x: 0, y: 0 },
-		{ x: -1, y: 0 },
-		{ x: -1, y: 1 },
-		{ x: 0, y: -2 },
-		{ x: -1, y: -2 }
-	];
-	const tests3_0 = [
-		// tests for state 3 to 2
-		{ x: 0, y: 0 },
-		{ x: -1, y: 0 },
-		{ x: -1, y: 1 },
-		{ x: 0, y: -2 },
-		{ x: -1, y: -2 }
-	];
-	const tests0_3 = [
-		// tests for any state into 3
-		{ x: 0, y: 0 },
-		{ x: 1, y: 0 },
-		{ x: 1, y: -1 },
-		{ x: 0, y: 2 },
-		{ x: 1, y: 2 }
-	];
+	let adjustment: Complex | null = { x: 0, y: 0 }; // the default adjustment is (0,0)
 
-	const Itests0_1 = [
-		// tests for line flat to line vertical clockwise
-		{ x: 0, y: 0 },
-		{ x: 2, y: 0 },
-		{ x: -1, y: 0 },
-		{ x: 2, y: 1 },
-		{ x: -1, y: -2 }
-	];
-	const Itests1_0 = [
-		// tests for line vertical to line flat anti-clockwise
-		{ x: 0, y: 0 },
-		{ x: -2, y: 0 },
-		{ x: 1, y: 0 },
-		{ x: -2, y: -1 },
-		{ x: 1, y: 2 }
-	];
-	const Itests1_2 = [
-		// tests for line vertical to line flat clockwise
-		{ x: 0, y: 0 },
-		{ x: 1, y: 0 },
-		{ x: -2, y: 0 },
-		{ x: 1, y: -2 },
-		{ x: -2, y: 1 }
-	];
-	const Itests2_3 = [
-		// tests for line vertical to line flat anti-clockwise
-		{ x: 0, y: 0 },
-		{ x: -2, y: 0 },
-		{ x: 1, y: 0 },
-		{ x: -2, y: -1 },
-		{ x: 1, y: 2 }
-	];
-	const Itests3_2 = [
-		// tests for line flat to line vertical clockwise
-		{ x: 0, y: 0 },
-		{ x: 2, y: 0 },
-		{ x: -1, y: 0 },
-		{ x: 2, y: 1 },
-		{ x: -1, y: -2 }
-	];
-
-	const Itests0_3 = [
-		// tests for line vertical to line flat clockwise
-		{ x: 0, y: 0 },
-		{ x: 1, y: 0 },
-		{ x: -2, y: 0 },
-		{ x: 1, y: -2 },
-		{ x: -2, y: 1 }
-	];
-	const Itests2_1 = [
-		// tests for line flat to line vertical anti-clockwise
-		{ x: 0, y: 0 },
-		{ x: -1, y: 0 },
-		{ x: 2, y: 0 },
-		{ x: -1, y: 2 },
-		{ x: 2, y: -1 }
-	];
-	const Itests3_0 = [
-		// tests for line flat to line vertical anti-clockwise
-		{ x: 0, y: 0 },
-		{ x: -1, y: 0 },
-		{ x: 2, y: 0 },
-		{ x: -1, y: 2 },
-		{ x: 2, y: -1 }
-	];
-
+	// goes through all the test positions and returns the first displacement that doesn't collide, if none are passed it returns null
 	const checkWallKick = (testPositions: Complex[]): Complex | null => {
-		for (let i in testPositions) {
-			console.log(testPositions[i]);
-			if (!pieceCollided({ ...state, pos: add(state.pos)(testPositions[i]) })) {
-				return testPositions[i];
+		for (let testPosIndex in testPositions) {
+			if (
+				!pieceCollided({
+					...state,
+					pos: add(state.pos)(testPositions[testPosIndex])
+				})
+			) {
+				return testPositions[testPosIndex];
 			}
 		}
 		return null;
 	};
-	let adjustment: Complex | null = { x: 0, y: 0 };
+
+	const kickRotationState = getKickRotationState(
+		oldRotationState,
+		state.piece.rotationState
+	); // gets the kick rotation state
+
+	// The I Piece has its own seperate test cases, this checks what tests the piece must go through
 	if (state.piece.name == "I_PIECE") {
-		switch (state.piece.rotationState) {
-			case RotationState.Initial:
-				adjustment =
-					oldRotationState == RotationState.Clockwise
-						? checkWallKick(Itests1_0)
-						: checkWallKick(Itests3_0);
-				break;
-			case RotationState.Clockwise:
-				adjustment =
-					oldRotationState == RotationState.Initial
-						? checkWallKick(Itests0_1)
-						: checkWallKick(Itests2_1);
-				break;
-			case RotationState.Flip:
-				adjustment =
-					oldRotationState == RotationState.Clockwise
-						? checkWallKick(Itests1_2)
-						: checkWallKick(Itests3_2);
-				break;
-			case RotationState.AntiClockwise:
-				adjustment =
-					oldRotationState == RotationState.Initial
-						? checkWallKick(Itests0_3)
-						: checkWallKick(Itests2_3);
-				break;
-		}
+		adjustment = checkWallKick(IPieceKickTestPositionsMap[kickRotationState]); // gets the final I piece adjustment
 	} else {
-		switch (state.piece.rotationState) {
-			case RotationState.Initial:
-				adjustment =
-					oldRotationState == RotationState.Clockwise
-						? checkWallKick(tests1_0)
-						: checkWallKick(tests3_0);
-				break;
-			case RotationState.Clockwise:
-				adjustment =
-					oldRotationState == RotationState.Initial
-						? checkWallKick(tests0_1)
-						: checkWallKick(tests2_1);
-				break;
-			case RotationState.Flip:
-				adjustment =
-					oldRotationState == RotationState.Clockwise
-						? checkWallKick(tests1_2)
-						: checkWallKick(tests3_2);
-				break;
-			case RotationState.AntiClockwise:
-				adjustment =
-					oldRotationState == RotationState.Initial
-						? checkWallKick(tests0_3)
-						: checkWallKick(tests2_3);
-				break;
-		}
+		adjustment = checkWallKick(kickTestPositionsMap[kickRotationState]); // gets the final non I piece adjustment
 	}
 	return adjustment;
 };

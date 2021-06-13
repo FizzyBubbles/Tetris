@@ -1,5 +1,4 @@
 import { Complex } from "./types";
-import diff from "jest-diff";
 
 // adds two complex numbers
 export const add = (n1: Complex) => (n2: Complex): Complex => ({

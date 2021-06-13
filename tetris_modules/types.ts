@@ -4,6 +4,7 @@ export type Complex = {
 	y: number; // imaginary part
 };
 
+// TODO: replace me with an enum
 export type PieceName =
 	| "O_PIECE"
 	| "I_PIECE"
@@ -15,11 +16,23 @@ export type PieceName =
 
 // export type rotationState = 0 | 1 | 2 | 3;
 
+// TODO: add a comment explaining this
 export enum RotationState {
-	Initial = "Initial",
-	Clockwise = "Clockwise",
-	Flip = "Flip",
-	AntiClockwise = "AntiClockwise"
+	North,
+	East,
+	South,
+	West
+}
+
+export enum KickRotationState {
+	NE = "North -> East",
+	NW = "North -> West",
+	EN = "East -> North",
+	ES = "East -> South",
+	SE = "South -> East",
+	SW = "South -> West",
+	WS = "West -> South",
+	WN = "West -> North"
 }
 
 export type Piece = {

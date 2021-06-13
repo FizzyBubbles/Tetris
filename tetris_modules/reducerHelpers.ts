@@ -1,11 +1,10 @@
-import { Transformation, GameState, Piece } from "./types";
+import { Transformation, GameState, Piece, RotationState } from "./types";
 
 import { multiply, add, subtract, rotate, cis } from "./complex";
 import { numFullRows, addPieceToGrid, clearFullRows } from "./collision";
 import { randomPiece, random7Bag } from "./random";
 import { calculateLevel, calculateScore } from "./scoring";
 import { STARTINGPOS, PIECE } from "./constants";
-
 // key press handling
 export const rotateClockwise: Transformation = multiply({ x: 0, y: 1 });
 export const rotateAntiClockwise: Transformation = multiply({ x: 0, y: -1 });

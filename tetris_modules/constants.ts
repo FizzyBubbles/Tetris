@@ -15,26 +15,24 @@ export const tomKEYBINDINGS = {
 	pause: 27
 };
 
+export const KEYBINDINGS = {
+	left: 37,
+	right: 39,
+	rotateClockwise: 38,
+	rotateAntiClockwise: 17,
+	softDrop: 40,
+	hardDrop: 32,
+	hold: 67,
+	reset: 82,
+	pause: 27
+};
+
 export const TomSettings: Settings = {
 	holdActive: true,
 	randomChoice: "7-BAG",
 	keyBindings: tomKEYBINDINGS,
 	dropShadow: true
 };
-
-// export const KeyBindings = {
-// 	left: 37,
-// 	right: 39,
-// 	rotateClockwise1: 38,
-// 	rotateClockwise2: 88,
-// 	rotateAntiClockwise: 90,
-// 	softDrop: 40,
-// 	hardDrop: 32,
-// 	hold: 67,
-// 	reset: 82,
-// 	pause1: 80,
-// 	pause2: 27
-// };
 
 export const CELL = {
 	EMPTY: 0,
