@@ -161,3 +161,19 @@ export const PIECES: Piece[] = [
 ];
 
 export const STARTINGPOS = { x: 3, y: -1 };
+
+export const FAILSCREENMESSAGES = [
+	"YOU ARE DIE",
+	"WOW THAT SUCKED!",
+	"BRUH",
+	"BOB COULDN'T FIX IT",
+	"CATASTROPHIC",
+	"THAT WAS QUICK",
+	"WHAT THE DUCK!",
+	"BETTER DUCK NEXT TIME",
+	"K.O.",
+	"FATALITY",
+	"F",
+	"BETA GAMER",
+	"JUST QUIT ALREADY"
+];

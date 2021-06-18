@@ -12,7 +12,6 @@ import {
 	Transformation,
 	RotationState
 } from "./types";
-import { gameCanvas } from "./drawUtils";
 import { add, multiply } from "./complex";
 import { CELL, PIECE } from "./constants";
 import { arrayExpression } from "@babel/types";
@@ -61,20 +60,6 @@ export const failed = (gameState: GameState): boolean => {
 	return failed;
 };
 
-// never used
-// checks if two pieces have collided
-export const squareCollision = (position1: Complex) => (position2: Complex) => {
-	if (!gameCanvas) return;
-	const HEIGHT = gameCanvas.clientHeight / 20;
-	const WIDTH = gameCanvas.clientWidth / 10;
-	return (
-		position1.x < position2.x + WIDTH &&
-		position1.x + WIDTH > position2.x &&
-		position1.y < position2.y + HEIGHT &&
-		position1.y + HEIGHT > position2.y
-	);
-};
-
 // maps the position to each of the vectors that make up a piece
 export const relativePos = (piece: Piece) => (position: Complex) =>
 	piece.shape.map(blockPosition => add(blockPosition)(position)); // returns the position of all the blocks in a piece plus the position.
@@ -104,14 +89,14 @@ export const pieceCollided = (gameState: GameState) => {
 	return collided;
 };
 
-// never used
-export const emptyRow = (length: number) => {
-	let row: number[] = [];
-	for (let i = 0; i < length; i++) {
-		row = [...row, CELL.EMPTY];
-	}
-	return row;
-};
+// // never used
+// export const emptyRow = (length: number) => {
+// 	let row: number[] = [];
+// 	for (let i = 0; i < length; i++) {
+// 		row = [...row, CELL.EMPTY];
+// 	}
+// 	return row;
+// };
 
 // applies rowIsFull to every row in a GameBoard
 export const fullRows = (board: GameBoard): boolean[] =>
@@ -120,14 +105,14 @@ export const fullRows = (board: GameBoard): boolean[] =>
 // if a row has no empty cells it will return true
 export const rowIsFull = (row: number[]): boolean => !row.includes(CELL.EMPTY);
 
-// never used
-export const clearLine = (board: GameBoard) => (
-	rowIndex: number
-): GameBoard => [
-	board.slice(rowIndex, rowIndex + 1).map(() => 0),
-	...board.slice(0, rowIndex),
-	...board.slice(rowIndex + 1)
-];
+// // never used
+// export const clearLine = (board: GameBoard) => (
+// 	rowIndex: number
+// ): GameBoard => [
+// 	board.slice(rowIndex, rowIndex + 1).map(() => 0),
+// 	...board.slice(0, rowIndex),
+// 	...board.slice(rowIndex + 1)
+// ];
 
 // removes all rows that are full and adds empty rows to the top of the board
 export const clearFullRows = (board: GameBoard): GameBoard => {

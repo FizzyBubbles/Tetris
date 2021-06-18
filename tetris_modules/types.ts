@@ -69,6 +69,7 @@ export type GameState = {
 	holdPiece: Piece | "empty";
 	holdFresh: Boolean;
 	fail: Boolean;
+	failMessage: string;
 	settings: Settings;
 };
 

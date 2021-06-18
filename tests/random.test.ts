@@ -20,9 +20,10 @@ expect.extend({
 	}
 });
 
-describe("randomPiece", () => {
-	it(
-		"should return a random piece in the range of random pieces",
-		expect(randomPiece()).toContain(PIECES)
-	);
-});
+// describe("randomPiece", () => {
+// 	it(
+// 		"should return a random piece in the range of random pieces",
+// 		expect(randomPiece()).toContain(PIECES)
+
+// 	);
+// });

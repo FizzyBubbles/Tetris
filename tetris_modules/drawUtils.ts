@@ -1,11 +1,12 @@
 import { hardDrop } from "./collision";
 import { Piece, Complex, GameBoard, GameState } from "./types";
 import { add } from "./complex";
-import { COLOURSCHEME } from "./constants";
+import { COLOURSCHEME, FAILSCREENMESSAGES } from "./constants";
 
 // Main Game Board Canvas references
 export let gameCanvas = document.getElementById("board") as HTMLCanvasElement;
-export let gameBoardContext = gameCanvas.getContext("2d");
+export let gameBoardContext =
+	typeof gameCanvas != null ? gameCanvas.getContext("2d") : null;
 
 // Queue canvas display
 export let queueCanvas = document.getElementById("queue") as HTMLCanvasElement;
@@ -13,7 +14,7 @@ export let queueContext = queueCanvas.getContext("2d");
 
 // Hold canvas references
 export let holdCanvas = document.getElementById("hold") as HTMLCanvasElement;
-let holdContext = holdCanvas.getContext("2d");
+let holdContext = holdCanvas.getContext("2d") as CanvasRenderingContext2D;
 
 // draw square
 export const drawSquareGameBoard = (colour: string) => (
@@ -174,11 +175,11 @@ export const drawFailScreen = (state: GameState): void => {
 
 		queueContext.filter = "blur(50px)";
 		holdContext.filter = "blur(50px)";
-		gameBoardContext.font = "50px Helvetica";
-		gameBoardContext.fillStyle = "red";
+		gameBoardContext.font = "25px Helvetica";
+		gameBoardContext.fillStyle = "white";
 		gameBoardContext.textAlign = "center";
 		gameBoardContext.fillText(
-			"U ARE DIE",
+			state.failMessage,
 			gameCanvas.width / 2,
 			gameCanvas.height / 3
 		);

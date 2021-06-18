@@ -1,63 +1,32 @@
 import { cloneDeep } from "lodash";
 import { makeStore } from "./tetris_modules/reduxSystem";
 import {
-	PIECES,
-	CELL,
 	STARTINGPOS,
 	TomSettings,
-	COLOURSCHEME
+	COLOURSCHEME,
+	FAILSCREENMESSAGES
 } from "./tetris_modules/constants";
+import { add, subtract } from "./tetris_modules/complex";
+import { GameState } from "./tetris_modules/types";
 import {
-	add,
-	multiply,
-	cis,
-	rotate,
-	ID,
-	subtract
-} from "./tetris_modules/complex";
-import {
-	Complex,
-	Piece,
-	Input,
-	Transformation,
-	GameBoard,
-	GameState
-} from "./tetris_modules/types";
-import {
-	drawSquareGameBoard,
-	drawPieceGameBoard,
-	gameBoardContext,
-	gameCanvas,
-	drawGrid,
 	draw,
 	drawPieceQueue,
 	fillQueue,
 	fillHold,
 	drawPieceHold,
-	holdCanvas,
 	drawFailScreen,
 	drawPieceDropShadow
 } from "./tetris_modules/drawUtils";
 import {
 	pieceCollided,
-	addPieceToGrid,
-	fullRows,
 	newGameBoard,
-	numFullRows,
 	failed,
 	calculateWallKickPosition as calculateWallKickDisplacement,
 	hardDrop
 } from "./tetris_modules/collision";
-import { stat } from "fs";
-import { calculateLevel, calculateScore } from "./tetris_modules/scoring";
-import { statement } from "@babel/template";
 import { randomPiece, random7Bag } from "./tetris_modules/random";
 import {
-	left,
-	right,
 	down,
-	rotateAntiClockwise,
-	rotateClockwise,
 	settlePiece,
 	moveLeft,
 	moveRight,
@@ -65,7 +34,6 @@ import {
 	rotatePieceClockwise,
 	resetPieceRotation
 } from "./tetris_modules/reducerHelpers";
-import { ConsoleWriter } from "istanbul-lib-report";
 
 const resetGameState = (): GameState => {
 	const firstPiece = randomPiece();
@@ -85,6 +53,7 @@ const resetGameState = (): GameState => {
 		holdPiece: "empty",
 		holdFresh: true,
 		fail: false,
+		failMessage: "FAILED",
 		settings: TomSettings
 	});
 };
@@ -218,7 +187,19 @@ const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 			return state.fail ? state : { ...state, paused: !state.paused };
 
 		case "CLOCK-TICK": {
-			if (state.paused || state.fail) return state;
+			if (state.paused) return state;
+			if (state.fail) {
+				return state.tick >= 100
+					? {
+							...state,
+							tick: 0,
+							failMessage:
+								FAILSCREENMESSAGES[
+									Math.floor(Math.random() * FAILSCREENMESSAGES.length)
+								]
+					  }
+					: { ...state, tick: state.tick + 1 };
+			}
 			const newState = { ...state, pos: down(state.pos), tick: 0 };
 			if (
 				state.tick >=
@@ -243,7 +224,7 @@ const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 
 const tetrisStore = makeStore(tetrisReducer, resetGameState());
 
-const elementMap = (elementId: string) => (
+export const elementMap = (elementId: string) => (
 	elementFunction: (e: HTMLElement) => void
 ) => {
 	const element = document.getElementById(elementId);
@@ -300,7 +281,7 @@ const main = () => {
 	tetrisStore.subscribe(drawDropShadow);
 };
 
-const loop = (timestamp: number) => {
+const loop = () => {
 	tetrisStore.dispatch("CLOCK-TICK");
 	window.requestAnimationFrame(loop);
 };
@@ -355,13 +336,6 @@ function openNav() {
 	document.getElementById("sideMenu").style.width = "250px";
 	document.getElementById("container").style.marginLeft = "250px";
 	document.body.style.backgroundColor = "rgba(0,0,0,0.4)";
-}
-
-/* Set the width of the side navigation to 0 and the left margin of the page content to 0, and the background color of body to white */
-function closeNav() {
-	document.getElementById("sideMenu").style.width = "0";
-	document.getElementById("container").style.marginLeft = "0";
-	document.body.style.backgroundColor = "white";
 }
 
 document.getElementById("settings").addEventListener("click", openNav);
