@@ -290,43 +290,20 @@ window.requestAnimationFrame(loop);
 
 document.onkeydown = e => {
 	const KEYBINDINGS = tetrisStore.state.settings.keyBindings;
-	switch (e.which) {
-		case KEYBINDINGS.left:
-			tetrisStore.dispatch("MOVE-LEFT");
-			break;
-
-		case KEYBINDINGS.right:
-			tetrisStore.dispatch("MOVE-RIGHT");
-			break;
-
-		case KEYBINDINGS.rotateClockwise:
-			tetrisStore.dispatch("ROTATE-CLOCKWISE");
-			break;
-
-		case KEYBINDINGS.rotateAntiClockwise:
-			tetrisStore.dispatch("ROTATE-ANTICLOCKWISE");
-			break;
-
-		case KEYBINDINGS.softDrop:
-			tetrisStore.dispatch("SOFT-DROP");
-			break;
-
-		case KEYBINDINGS.hardDrop:
-			tetrisStore.dispatch("HARD-DROP");
-			break;
-
-		case KEYBINDINGS.hold:
-			tetrisStore.dispatch("HOLD");
-			break;
-
-		case KEYBINDINGS.reset:
-			tetrisStore.dispatch("RESET");
-			break;
-
-		case KEYBINDINGS.pause:
-			tetrisStore.dispatch("PAUSE");
-			break;
-	}
+	const currentKey = e.which;
+	if (KEYBINDINGS.left.includes(currentKey)) tetrisStore.dispatch("MOVE-LEFT");
+	if (KEYBINDINGS.right.includes(currentKey))
+		tetrisStore.dispatch("MOVE-RIGHT");
+	if (KEYBINDINGS.rotateClockwise.includes(currentKey))
+		tetrisStore.dispatch("ROTATE-CLOCKWISE");
+	if (KEYBINDINGS.rotateAntiClockwise.includes(currentKey))
+		tetrisStore.dispatch("ROTATE-ANTICLOCKWISE");
+	if (KEYBINDINGS.softDrop.includes(currentKey))
+		tetrisStore.dispatch("SOFT-DROP");
+	if (KEYBINDINGS.hardDrop.includes(currentKey)) tetrisStore.dispatch("HARD-DROP");
+	if (KEYBINDINGS.hold.includes(currentKey)) tetrisStore.dispatch("HOLD");
+	if (KEYBINDINGS.reset.includes(currentKey)) tetrisStore.dispatch("RESET");
+	if (KEYBINDINGS.pause.includes(currentKey)) tetrisStore.dispatch("PAUSE");
 };
 
 main();

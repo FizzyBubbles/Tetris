@@ -45,15 +45,15 @@ export type Piece = {
 };
 
 export type KeyBinding = {
-	left: number;
-	right: number;
-	rotateClockwise: number;
-	rotateAntiClockwise: number;
-	softDrop: number;
-	hardDrop: number;
-	hold: number;
-	reset: number;
-	pause: number;
+	left: number[];
+	right: number[];
+	rotateClockwise: number[];
+	rotateAntiClockwise: number[];
+	softDrop: number[];
+	hardDrop: number[];
+	hold: number[];
+	reset: number[];
+	pause: number[];
 };
 
 export type GameState = {

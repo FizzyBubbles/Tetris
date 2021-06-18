@@ -4,27 +4,27 @@ import { GameState, Piece, PieceName } from "./types";
 import { randomPieces, random7Bag, randomPiece } from "./random";
 
 export const tomKEYBINDINGS = {
-	left: 85,
-	right: 48,
-	rotateClockwise: 70,
-	rotateAntiClockwise: 83,
-	softDrop: 57,
-	hardDrop: 32,
-	hold: 68,
-	reset: 82,
-	pause: 27
+	left: [85],
+	right: [48],
+	rotateClockwise: [70],
+	rotateAntiClockwise: [83],
+	softDrop: [57],
+	hardDrop: [32],
+	hold: [68],
+	reset: [82],
+	pause: [27]
 };
 
 export const KEYBINDINGS = {
-	left: 37,
-	right: 39,
-	rotateClockwise: 38,
-	rotateAntiClockwise: 17,
-	softDrop: 40,
-	hardDrop: 32,
-	hold: 67,
-	reset: 82,
-	pause: 27
+	left: [37],
+	right: [39],
+	rotateClockwise: [88, 38],
+	rotateAntiClockwise: [17, 90],
+	softDrop: [40],
+	hardDrop: [32],
+	hold: [67, 16],
+	reset: [82],
+	pause: [27]
 };
 
 export const TomSettings: Settings = {
