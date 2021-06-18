@@ -56,11 +56,13 @@ export type KeyBinding = {
 	pause: number[];
 };
 
+// TODO: move stats to a stat state
 export type GameState = {
 	queue: Piece[];
 	cummulativeLineClears: number;
 	level: number;
 	score: number;
+	highScore: number;
 	piece: Piece;
 	pos: Complex;
 	board: GameBoard;

@@ -35,13 +35,14 @@ import {
 	resetPieceRotation
 } from "./tetris_modules/reducerHelpers";
 
-const resetGameState = (): GameState => {
+const resetGameState = (HighScore: number): GameState => {
 	const firstPiece = randomPiece();
 	return cloneDeep({
 		queue: random7Bag(),
 		cummulativeLineClears: 0,
 		level: 0,
 		score: 0,
+		highScore: HighScore,
 		piece: {
 			...firstPiece,
 			shape: firstPiece.shape.map(subtract(firstPiece.rotationalCentre))
@@ -68,7 +69,8 @@ type GameAction =
 	| "ROTATE-ANTICLOCKWISE"
 	| "PAUSE"
 	| "CLOCK-TICK"
-	| "RESET";
+	| "RESET"
+	| "EXIT-FAIL";
 
 const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 	switch (action) {
@@ -131,7 +133,7 @@ const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 			const newState = { ...state, pos: down(state.pos) };
 			if (pieceCollided(newState)) {
 				if (failed(newState)) {
-					return resetGameState();
+					return resetGameState(state.highScore);
 				}
 				return { ...settlePiece(state), holdFresh: true };
 			}
@@ -200,7 +202,12 @@ const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 					  }
 					: { ...state, tick: state.tick + 1 };
 			}
-			const newState = { ...state, pos: down(state.pos), tick: 0 };
+			const newState = {
+				...state,
+				pos: down(state.pos),
+				tick: 0,
+				highScore: state.score > state.highScore ? state.score : state.highScore // changes high score if new high score gained
+			};
 			if (
 				state.tick >=
 				10 * Math.pow(0.8 - (state.level - 1) * 0.007, state.level - 1) // speed calculation
@@ -217,12 +224,15 @@ const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 		}
 
 		case "RESET": {
-			return resetGameState();
+			return resetGameState(state.highScore);
+		}
+		case "EXIT-FAIL": {
+			return state.fail ? resetGameState(state.highScore) : state;
 		}
 	}
 };
 
-const tetrisStore = makeStore(tetrisReducer, resetGameState());
+const tetrisStore = makeStore(tetrisReducer, resetGameState(0));
 
 export const elementMap = (elementId: string) => (
 	elementFunction: (e: HTMLElement) => void
@@ -241,6 +251,9 @@ const main = () => {
 	// listeners
 	const drawState = (tetrisState: GameState) => {
 		draw(tetrisState); // draws the board
+	};
+	const writeHighScore = (gameState: GameState): void => {
+		setElementInnerHTML("highScore")("High Score: " + gameState.highScore);
 	};
 	const writeScore = (gameState: GameState): void => {
 		setElementInnerHTML("score")("Score: " + gameState.score);
@@ -271,6 +284,7 @@ const main = () => {
 	const drawDropShadow = (gameState: GameState): void => {
 		if (tetrisStore.state.settings.dropShadow) drawPieceDropShadow(gameState);
 	};
+	tetrisStore.subscribe(writeHighScore);
 	tetrisStore.subscribe(writeScore);
 	tetrisStore.subscribe(writeLevel);
 	tetrisStore.subscribe(writeLinesCleared);
@@ -291,19 +305,31 @@ window.requestAnimationFrame(loop);
 document.onkeydown = e => {
 	const KEYBINDINGS = tetrisStore.state.settings.keyBindings;
 	const currentKey = e.which;
+	console.log(tetrisStore.state);
 	if (KEYBINDINGS.left.includes(currentKey)) tetrisStore.dispatch("MOVE-LEFT");
+
 	if (KEYBINDINGS.right.includes(currentKey))
 		tetrisStore.dispatch("MOVE-RIGHT");
+
 	if (KEYBINDINGS.rotateClockwise.includes(currentKey))
 		tetrisStore.dispatch("ROTATE-CLOCKWISE");
+
 	if (KEYBINDINGS.rotateAntiClockwise.includes(currentKey))
 		tetrisStore.dispatch("ROTATE-ANTICLOCKWISE");
+
 	if (KEYBINDINGS.softDrop.includes(currentKey))
 		tetrisStore.dispatch("SOFT-DROP");
-	if (KEYBINDINGS.hardDrop.includes(currentKey)) tetrisStore.dispatch("HARD-DROP");
+
+	if (KEYBINDINGS.hardDrop.includes(currentKey))
+		tetrisStore.dispatch("HARD-DROP");
+
 	if (KEYBINDINGS.hold.includes(currentKey)) tetrisStore.dispatch("HOLD");
+
 	if (KEYBINDINGS.reset.includes(currentKey)) tetrisStore.dispatch("RESET");
+
 	if (KEYBINDINGS.pause.includes(currentKey)) tetrisStore.dispatch("PAUSE");
+
+	tetrisStore.dispatch("EXIT-FAIL");
 };
 
 main();

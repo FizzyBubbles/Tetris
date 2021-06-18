@@ -183,7 +183,7 @@ export const drawFailScreen = (state: GameState): void => {
 			gameCanvas.width / 2,
 			gameCanvas.height / 3
 		);
-		gameBoardContext.fillStyle = "white";
+		gameBoardContext.font = "30px Helvetica";
 		gameBoardContext.fillText(
 			state.score.toString(),
 			gameCanvas.width / 2,
