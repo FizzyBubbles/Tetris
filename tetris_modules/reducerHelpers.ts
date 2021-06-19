@@ -5,7 +5,9 @@ import { numFullRows, addPieceToGrid, clearFullRows } from "./collision";
 import { randomPiece, random7Bag } from "./random";
 import { calculateLevel, calculateScore } from "./scoring";
 import { STARTINGPOS, PIECE } from "./constants";
+
 // key press handling
+// Mathematical transformations for vectors
 export const rotateClockwise: Transformation = multiply({ x: 0, y: 1 });
 export const rotateAntiClockwise: Transformation = multiply({ x: 0, y: -1 });
 export const rotate180: Transformation = multiply({ x: -1, y: 0 });
@@ -13,87 +15,66 @@ export const down: Transformation = add({ x: 0, y: 1 });
 export const left: Transformation = add({ x: -1, y: 0 });
 export const right: Transformation = add({ x: 1, y: 0 });
 
-export const moveLeft = (state: GameState): GameState => ({
-	...state,
-	pos: left(state.pos)
-}); // TODO: make sure this isn't an unnecessary abstraction
-export const moveRight = (state: GameState): GameState => ({
-	...state,
-	pos: right(state.pos)
-}); // TODO: make sure this isn't an unnecessary abstraction
 export const rotatePieceClockwise = (piece: Piece): Piece => ({
-	...updatePiece(piece)(rotateClockwise),
-	rotationState: (piece.rotationState + 1) % 4
+	...piece,
+	shape: piece.shape.map(rotateClockwise),
+	rotationState: (piece.rotationState + 1) % 4 // updates piece
 });
 export const rotatePieceAntiClockwise = (piece: Piece): Piece => ({
-	...updatePiece(piece)(rotateAntiClockwise),
+	...piece,
+	shape: piece.shape.map(rotateAntiClockwise),
 	rotationState: (piece.rotationState + 3) % 4
 });
+
 export const rotatePiece180 = (piece: Piece): Piece => ({
-	...updatePiece(piece)(rotate180),
+	...piece,
+	shape: piece.shape.map(rotate180),
 	rotationState: (piece.rotationState + 2) % 4
 });
 
-export const updatePiece = (piece: Piece) => (
-	transformation: Transformation
-): Piece => ({
-	...piece,
-	shape: piece.shape.map(transformation)
-});
-
 export const resetPieceRotation = (piece: Piece): Piece => {
-	let basePiece = piece;
+	let basePiece = piece; // if rotation state of piece is North it will return itself
 	switch (piece.rotationState) {
-		case 0:
-			basePiece = piece;
-			break;
-		case 1:
+		// rotates anticlockwise back to North
+		case RotationState.East:
 			basePiece = rotatePieceAntiClockwise(piece);
 			break;
-		case 2:
+
+		// rotates 180 back to North
+		case RotationState.South:
 			basePiece = rotatePiece180(piece);
 			break;
-		case 3:
+
+		// rotates clockwise back to North
+		case RotationState.West:
 			basePiece = rotatePieceClockwise(piece);
 			break;
 	}
 	return basePiece;
 };
 
+// routine for adding a piece to grid and cycling to the next piece
 export const settlePiece = (state: GameState): GameState => {
 	const numLinesCleared = numFullRows(addPieceToGrid(state).board);
 	const nextPiece = state.queue[0];
-	// console.log("nextPiece: ", nextPiece.name);
-	// console.log(
-	// 	"queue initial: ",
-	// 	state.queue.map(e => e.name)
-	// );
+
 	const nextState = {
 		...state,
+		// makes sure the queue is stocked at all times
 		queue:
 			state.queue.length <= 7
 				? [...state.queue.slice(1), ...random7Bag()]
 				: state.queue.slice(1),
-		cummulativeLineClears: state.cummulativeLineClears + numLinesCleared,
-		level: calculateLevel(state.cummulativeLineClears),
-		score: state.score + calculateScore(numLinesCleared)(state.level),
-		board: clearFullRows(addPieceToGrid(state).board),
-		pos: add(nextPiece.rotationalCentre)(STARTINGPOS),
+		cummulativeLineClears: state.cummulativeLineClears + numLinesCleared, // increases the line clears
+		level: calculateLevel(state.cummulativeLineClears), // updates the level
+		score: state.score + calculateScore(numLinesCleared)(state.level), // increases the score
+		board: clearFullRows(addPieceToGrid(state).board), // removes the full rows
+		pos: add(nextPiece.rotationalCentre)(STARTINGPOS), // adjusts the piece position
 		piece: {
 			...nextPiece,
-			shape: nextPiece.shape.map(subtract(nextPiece.rotationalCentre))
+			shape: nextPiece.shape.map(subtract(nextPiece.rotationalCentre)) // adjusts piece position for shape
 		}
 	};
 
-	// console.log(
-	// 	"queue next: ",
-	// 	nextState.queue.map(e => e.name)
-	// );
-	// console.log("Current Score: ", nextState.score);
-	// console.log("Current Level: ", nextState.level);
-	// console.log(
-	// 	"Cummulative Line Clears: ",
-	// 	nextState.cummulativeLineClears
-	// );
 	return nextState;
 };

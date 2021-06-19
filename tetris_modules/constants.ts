@@ -1,7 +1,9 @@
 import { Settings } from "./types";
 import { newGameBoard } from "./collision";
-import { GameState, Piece, PieceName } from "./types";
-import { randomPieces, random7Bag, randomPiece } from "./random";
+import { GameState, Piece } from "./types";
+import { random7Bag, randomPiece } from "./random";
+import { subtract, add } from "./complex";
+import { cloneDeep } from "lodash";
 
 export const tomKEYBINDINGS = {
 	left: [85],
@@ -13,7 +15,7 @@ export const tomKEYBINDINGS = {
 	hold: [68],
 	reset: [82],
 	pause: [27]
-};
+}; // the best keybindings
 
 export const KEYBINDINGS = {
 	left: [37],
@@ -25,14 +27,14 @@ export const KEYBINDINGS = {
 	hold: [67, 16],
 	reset: [82],
 	pause: [27]
-};
+}; // lame bad keybindings for beta children
 
-export const TomSettings: Settings = {
+export const DEFAULTSETTINGS: Settings = {
 	holdActive: true,
 	randomChoice: "7-BAG",
-	keyBindings: tomKEYBINDINGS,
+	keyBindings: KEYBINDINGS,
 	dropShadow: true
-};
+}; // default settings
 
 export const CELL = {
 	EMPTY: 0,
@@ -148,7 +150,7 @@ export const PIECE = {
 			{ x: 2, y: 0 }
 		]
 	}
-};
+}; // every piece
 
 export const PIECES: Piece[] = [
 	PIECE.I_PIECE,
@@ -158,9 +160,9 @@ export const PIECES: Piece[] = [
 	PIECE.S_PIECE,
 	PIECE.T_PIECE,
 	PIECE.Z_PIECE
-];
+]; // a scrambleable list of all the pieces
 
-export const STARTINGPOS = { x: 3, y: -1 };
+export const STARTINGPOS = { x: 4, y: -1 }; // the starting displacement of the pieces
 
 export const FAILSCREENMESSAGES = [
 	"YOU ARE DIE",
@@ -176,4 +178,29 @@ export const FAILSCREENMESSAGES = [
 	"F",
 	"BETA GAMER",
 	"JUST QUIT ALREADY"
-];
+]; // a lil cheeky cheeky
+
+// returns a cleared gameState but retains the high score
+export const resetGameState = (HighScore: number): GameState => {
+	const firstPiece = randomPiece();
+	return cloneDeep({
+		queue: random7Bag(),
+		cummulativeLineClears: 0,
+		level: 0,
+		score: 0,
+		highScore: HighScore,
+		piece: {
+			...firstPiece,
+			shape: firstPiece.shape.map(subtract(firstPiece.rotationalCentre))
+		},
+		pos: add(firstPiece.rotationalCentre)(STARTINGPOS),
+		board: newGameBoard(10)(20),
+		tick: 0,
+		paused: false,
+		holdPiece: "empty",
+		holdFresh: true,
+		fail: false,
+		failMessage: "FAILED",
+		settings: DEFAULTSETTINGS
+	});
+};

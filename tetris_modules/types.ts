@@ -16,7 +16,7 @@ export type PieceName =
 
 // export type rotationState = 0 | 1 | 2 | 3;
 
-// TODO: add a comment explaining this
+// see here for explanation https://four.lol/srs/kicks-overview
 export enum RotationState {
 	North,
 	East,
@@ -24,6 +24,7 @@ export enum RotationState {
 	West
 }
 
+// see here for explanation https://four.lol/srs/kicks-overview
 export enum KickRotationState {
 	NE = "North -> East",
 	NW = "North -> West",
