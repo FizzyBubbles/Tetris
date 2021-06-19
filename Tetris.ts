@@ -1,64 +1,40 @@
-import { cloneDeep } from "lodash";
 import { makeStore } from "./tetris_modules/reduxSystem";
 import {
 	STARTINGPOS,
-	TomSettings,
-	COLOURSCHEME,
-	FAILSCREENMESSAGES
+	FAILSCREENMESSAGES,
+	resetGameState
 } from "./tetris_modules/constants";
 import { add, subtract } from "./tetris_modules/complex";
 import { GameState } from "./tetris_modules/types";
 import {
-	draw,
-	drawPieceQueue,
-	fillQueue,
-	fillHold,
-	drawPieceHold,
-	drawFailScreen,
-	drawPieceDropShadow
-} from "./tetris_modules/drawUtils";
-import {
 	pieceCollided,
-	newGameBoard,
 	failed,
 	calculateWallKickPosition as calculateWallKickDisplacement,
 	hardDrop
 } from "./tetris_modules/collision";
-import { randomPiece, random7Bag } from "./tetris_modules/random";
 import {
 	down,
 	settlePiece,
-	moveLeft,
-	moveRight,
 	rotatePieceAntiClockwise,
 	rotatePieceClockwise,
-	resetPieceRotation
+	resetPieceRotation,
+	left,
+	right
 } from "./tetris_modules/reducerHelpers";
+import { calculateSpeed } from "./tetris_modules/scoring";
+import {
+	writeHighScore,
+	writeScore,
+	writeLevel,
+	writeLinesCleared,
+	drawState,
+	drawQueue,
+	drawHold,
+	drawFail,
+	drawGhost
+} from "./tetris_modules/tetrisListeners";
 
-const resetGameState = (HighScore: number): GameState => {
-	const firstPiece = randomPiece();
-	return cloneDeep({
-		queue: random7Bag(),
-		cummulativeLineClears: 0,
-		level: 0,
-		score: 0,
-		highScore: HighScore,
-		piece: {
-			...firstPiece,
-			shape: firstPiece.shape.map(subtract(firstPiece.rotationalCentre))
-		},
-		pos: add(firstPiece.rotationalCentre)(STARTINGPOS),
-		board: newGameBoard(10)(20),
-		tick: 0,
-		paused: false,
-		holdPiece: "empty",
-		holdFresh: true,
-		fail: false,
-		failMessage: "FAILED",
-		settings: TomSettings
-	});
-};
-
+// all possible edits to the game state (GameActions)
 type GameAction =
 	| "HOLD"
 	| "MOVE-LEFT"
@@ -75,10 +51,9 @@ type GameAction =
 const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 	switch (action) {
 		case "HOLD": {
-			// TODO: figure out what the fuck you are doing here
+			if (!state.holdFresh || state.paused || state.fail) return state; // returns state if failed, or paused, or the piece has been in hold before
 
-			if (!state.holdFresh || state.paused || state.fail) return state;
-
+			// sets the next hold piece and adjusts it back to the correct orientation
 			const nextHold = {
 				...resetPieceRotation(state.piece),
 				shape: resetPieceRotation(state.piece).shape.map(
@@ -86,56 +61,59 @@ const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 				)
 			};
 
+			// if the hold is empty it will take the next piece from the queue as opposed to the hold itself
 			if (state.holdPiece == "empty") {
-				const nextPiece = state.queue[0];
-				const nextQueue = state.queue.slice(1);
+				const nextPiece = state.queue[0]; // takes first piece from queue
+				const nextQueue = state.queue.slice(1); // removes element from queue
 				const nextState = {
 					...state,
-					pos: add(nextPiece.rotationalCentre)(STARTINGPOS),
-					holdPiece: nextHold,
-					queue: nextQueue,
+					pos: add(nextPiece.rotationalCentre)(STARTINGPOS), // adjusts the piece position
+					holdPiece: nextHold, // sets the hold piece
+					queue: nextQueue, // sets the next queue
 					piece: {
 						...nextPiece,
-						shape: nextPiece.shape.map(subtract(nextPiece.rotationalCentre))
+						shape: nextPiece.shape.map(subtract(nextPiece.rotationalCentre)) // adjusts the piece shape
 					},
-					holdFresh: false
+					holdFresh: false // unfreshens the hold
 				};
 				return nextState;
 			} else {
-				const nextPiece = state.holdPiece;
+				const nextPiece = state.holdPiece; // sets the next piece as the current hold piece
 				const nextState = {
 					...state,
-					pos: add(nextPiece.rotationalCentre)(STARTINGPOS),
-					holdPiece: nextHold,
+					pos: add(nextPiece.rotationalCentre)(STARTINGPOS), // adjusts the piece position
+					holdPiece: nextHold, // sets the hold piece
 					piece: {
 						...nextPiece,
-						shape: nextPiece.shape.map(subtract(nextPiece.rotationalCentre))
+						shape: nextPiece.shape.map(subtract(nextPiece.rotationalCentre)) // adjustst the piece shape
 					},
-					holdFresh: false
+					holdFresh: false // unfreshens the hold
 				};
 				return nextState;
 			}
 		}
 		case "MOVE-LEFT": {
-			if (state.paused || state.fail) return state; // returns state if paused
-			const newState = moveLeft(state);
+			if (state.paused || state.fail) return state; // returns state if paused or failed
+			const newState = { ...state, pos: left(state.pos) };
 			return pieceCollided(newState) ? state : newState;
 		}
 
 		case "MOVE-RIGHT": {
-			if (state.paused || state.fail) return state; // returns state if paused
-			const newState = moveRight(state);
+			if (state.paused || state.fail) return state; // returns state if paused or failed
+			const newState = { ...state, pos: right(state.pos) };
 			return pieceCollided(newState) ? state : newState;
 		}
 
 		case "SOFT-DROP": {
-			if (state.paused || state.fail) return state; // returns state if paused
+			if (state.paused || state.fail) return state; // returns state if paused or failed
 			const newState = { ...state, pos: down(state.pos) };
 			if (pieceCollided(newState)) {
 				if (failed(newState)) {
-					return resetGameState(state.highScore);
+					return state.score > state.highScore
+						? resetGameState(state.score) // if new highscore the game will keep that high score
+						: resetGameState(state.highScore); // if not it remains the same
 				}
-				return { ...settlePiece(state), holdFresh: true };
+				return { ...settlePiece(state), holdFresh: true }; // refreshsens
 			}
 			return newState;
 		}
@@ -150,7 +128,7 @@ const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 		}
 
 		case "ROTATE-ANTICLOCKWISE": {
-			if (state.paused || state.fail) return state; // returns state if paused
+			if (state.paused || state.fail) return state; // returns state if paused or failed
 			const newState = {
 				...state,
 				piece: rotatePieceAntiClockwise(state.piece)
@@ -168,7 +146,7 @@ const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 		}
 
 		case "ROTATE-CLOCKWISE": {
-			if (state.paused || state.fail) return state; // returns state if paused
+			if (state.paused || state.fail) return state; // returns state if paused or failed
 			const newState = {
 				...state,
 				piece: rotatePieceClockwise(state.piece)
@@ -186,37 +164,37 @@ const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 		}
 
 		case "PAUSE":
-			return state.fail ? state : { ...state, paused: !state.paused };
+			return state.fail ? state : { ...state, paused: !state.paused }; // toggles pause if not failed
 
 		case "CLOCK-TICK": {
-			if (state.paused) return state;
+			if (state.paused) return state; // returns state if paused
+
 			if (state.fail) {
+				// changes the message for fail screen every 100 ticks
 				return state.tick >= 100
 					? {
 							...state,
-							tick: 0,
+							tick: 0, // resets tick timer
 							failMessage:
 								FAILSCREENMESSAGES[
 									Math.floor(Math.random() * FAILSCREENMESSAGES.length)
-								]
+								] // changes the fail screen message to a random message from the FAILSCREENMESSAGES array
 					  }
-					: { ...state, tick: state.tick + 1 };
+					: { ...state, tick: state.tick + 1 }; // otherwise increases the tick
 			}
+
 			const newState = {
 				...state,
 				pos: down(state.pos),
-				tick: 0,
-				highScore: state.score > state.highScore ? state.score : state.highScore // changes high score if new high score gained
+				tick: 0 // resets the tick
 			};
-			if (
-				state.tick >=
-				10 * Math.pow(0.8 - (state.level - 1) * 0.007, state.level - 1) // speed calculation
-			) {
+			if (state.tick >= calculateSpeed(state.level)) {
 				if (pieceCollided(newState)) {
+					// collision procedure
 					if (failed(newState)) {
 						return { ...newState, fail: true };
 					}
-					return { ...settlePiece(state), tick: 0, holdFresh: true };
+					return { ...settlePiece(state), tick: 0, holdFresh: true }; // refreshens
 				}
 				return newState;
 			}
@@ -224,66 +202,24 @@ const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 		}
 
 		case "RESET": {
-			return resetGameState(state.highScore);
+			return state.score > state.highScore
+				? resetGameState(state.score) // if new highscore the game will keep that high score
+				: resetGameState(state.highScore); // if not it remains the same;
 		}
 		case "EXIT-FAIL": {
-			return state.fail ? resetGameState(state.highScore) : state;
+			return state.fail
+				? state.score > state.highScore
+					? resetGameState(state.score) // if new highscore the game will keep that high score
+					: resetGameState(state.highScore) // if not it remains the same
+				: state;
 		}
 	}
 };
 
-const tetrisStore = makeStore(tetrisReducer, resetGameState(0));
-
-export const elementMap = (elementId: string) => (
-	elementFunction: (e: HTMLElement) => void
-) => {
-	const element = document.getElementById(elementId);
-	if (!element) return;
-
-	elementFunction(element);
-};
-
-const setElementInnerHTML = (elementId: string) => (content: string) => {
-	elementMap(elementId)(element => (element.innerHTML = content));
-};
+export const tetrisStore = makeStore(tetrisReducer, resetGameState(0)); // makes the initial store
 
 const main = () => {
-	// listeners
-	const drawState = (tetrisState: GameState) => {
-		draw(tetrisState); // draws the board
-	};
-	const writeHighScore = (gameState: GameState): void => {
-		setElementInnerHTML("highScore")("High Score: " + gameState.highScore);
-	};
-	const writeScore = (gameState: GameState): void => {
-		setElementInnerHTML("score")("Score: " + gameState.score);
-	};
-	const writeLevel = (gameState: GameState): void => {
-		setElementInnerHTML("level")("Level: " + gameState.level);
-	};
-	const writeLinesCleared = (gameState: GameState): void => {
-		setElementInnerHTML("linesCleared")(
-			"Lines Cleared: " + gameState.cummulativeLineClears
-		);
-	};
-	const drawQueue = (gameState: GameState): void => {
-		fillQueue(COLOURSCHEME[0]);
-		gameState.queue.forEach((piece, queuePlacement) =>
-			drawPieceQueue(piece)({ x: 1, y: queuePlacement * 3 + 2 })
-		);
-	};
-	const drawHold = (gameState: GameState): void => {
-		fillHold(COLOURSCHEME[0]);
-		if (gameState.holdPiece != "empty") {
-			drawPieceHold(gameState.holdPiece)({ x: 1, y: 2 });
-		}
-	};
-	const drawFail = (gameState: GameState): void => {
-		drawFailScreen(gameState);
-	};
-	const drawDropShadow = (gameState: GameState): void => {
-		if (tetrisStore.state.settings.dropShadow) drawPieceDropShadow(gameState);
-	};
+	// adds all the listeners
 	tetrisStore.subscribe(writeHighScore);
 	tetrisStore.subscribe(writeScore);
 	tetrisStore.subscribe(writeLevel);
@@ -292,44 +228,58 @@ const main = () => {
 	tetrisStore.subscribe(drawQueue);
 	tetrisStore.subscribe(drawHold);
 	tetrisStore.subscribe(drawFail);
-	tetrisStore.subscribe(drawDropShadow);
+	tetrisStore.subscribe(drawGhost);
 };
 
 const loop = () => {
-	tetrisStore.dispatch("CLOCK-TICK");
+	tetrisStore.dispatch("CLOCK-TICK"); // calls "clock-tick"
 	window.requestAnimationFrame(loop);
 };
 
 window.requestAnimationFrame(loop);
 
+// Key Press Input
 document.onkeydown = e => {
-	const KEYBINDINGS = tetrisStore.state.settings.keyBindings;
-	const currentKey = e.which;
-	console.log(tetrisStore.state);
-	if (KEYBINDINGS.left.includes(currentKey)) tetrisStore.dispatch("MOVE-LEFT");
+	const keyBinds = tetrisStore.state.settings.keyBindings; // sets the keybindings to the states current keybindings
+	const currentKey = e.which; // more meaninful name
 
-	if (KEYBINDINGS.right.includes(currentKey))
+	if (keyBinds.left.includes(currentKey)) {
+		tetrisStore.dispatch("MOVE-LEFT");
+	}
+
+	if (keyBinds.right.includes(currentKey)) {
 		tetrisStore.dispatch("MOVE-RIGHT");
+	}
 
-	if (KEYBINDINGS.rotateClockwise.includes(currentKey))
+	if (keyBinds.rotateClockwise.includes(currentKey)) {
 		tetrisStore.dispatch("ROTATE-CLOCKWISE");
+	}
 
-	if (KEYBINDINGS.rotateAntiClockwise.includes(currentKey))
+	if (keyBinds.rotateAntiClockwise.includes(currentKey)) {
 		tetrisStore.dispatch("ROTATE-ANTICLOCKWISE");
+	}
 
-	if (KEYBINDINGS.softDrop.includes(currentKey))
+	if (keyBinds.softDrop.includes(currentKey)) {
 		tetrisStore.dispatch("SOFT-DROP");
+	}
 
-	if (KEYBINDINGS.hardDrop.includes(currentKey))
+	if (keyBinds.hardDrop.includes(currentKey)) {
 		tetrisStore.dispatch("HARD-DROP");
+	}
 
-	if (KEYBINDINGS.hold.includes(currentKey)) tetrisStore.dispatch("HOLD");
+	if (keyBinds.hold.includes(currentKey)) {
+		tetrisStore.dispatch("HOLD");
+	}
 
-	if (KEYBINDINGS.reset.includes(currentKey)) tetrisStore.dispatch("RESET");
+	if (keyBinds.reset.includes(currentKey)) {
+		tetrisStore.dispatch("RESET");
+	}
 
-	if (KEYBINDINGS.pause.includes(currentKey)) tetrisStore.dispatch("PAUSE");
+	if (keyBinds.pause.includes(currentKey)) {
+		tetrisStore.dispatch("PAUSE");
+	}
 
-	tetrisStore.dispatch("EXIT-FAIL");
+	tetrisStore.dispatch("EXIT-FAIL"); // any key press will attempt to leave the fail screen
 };
 
 main();
