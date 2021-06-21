@@ -45,6 +45,7 @@ export type Piece = {
 	rotationalCentre: Complex;
 };
 
+// Each action can have multiple keys bound to each
 export type KeyBinding = {
 	left: number[];
 	right: number[];

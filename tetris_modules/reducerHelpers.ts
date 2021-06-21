@@ -1,10 +1,10 @@
 import { Transformation, GameState, Piece, RotationState } from "./types";
 
-import { multiply, add, subtract, rotate, cis } from "./complex";
+import { multiply, add, subtract } from "./complex";
 import { numFullRows, addPieceToGrid, clearFullRows } from "./collision";
-import { randomPiece, random7Bag } from "./random";
+import { random7Bag } from "./random";
 import { calculateLevel, calculateScore } from "./scoring";
-import { STARTINGPOS, PIECE } from "./constants";
+import { STARTINGPOS } from "./constants";
 
 // key press handling
 // Mathematical transformations for vectors
