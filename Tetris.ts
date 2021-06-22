@@ -1,9 +1,5 @@
 import { makeStore } from "./tetris_modules/reduxSystem";
-import {
-	STARTINGPOS,
-	FAILSCREENMESSAGES,
-	resetGameState
-} from "./tetris_modules/constants";
+import { STARTINGPOS, resetGameState } from "./tetris_modules/constants";
 import { add, subtract } from "./tetris_modules/complex";
 import { GameState } from "./tetris_modules/types";
 import {
@@ -33,6 +29,8 @@ import {
 	drawFail,
 	drawGhost
 } from "./tetris_modules/tetrisListeners";
+import { keydown, keyup } from "./tetris_modules/keyhandling";
+import { FAILSCREENMESSAGES } from "./tetris_modules/SETTINGS";
 
 // all possible edits to the game state (GameActions)
 type GameAction =
@@ -238,48 +236,7 @@ const loop = () => {
 
 window.requestAnimationFrame(loop);
 
-// Key Press Input
-document.onkeydown = e => {
-	const keyBinds = tetrisStore.state.settings.keyBindings; // sets the keybindings to the states current keybindings
-	const currentKey = e.which; // more meaningful name
-
-	if (keyBinds.left.includes(currentKey)) {
-		tetrisStore.dispatch("MOVE-LEFT");
-	}
-
-	if (keyBinds.right.includes(currentKey)) {
-		tetrisStore.dispatch("MOVE-RIGHT");
-	}
-
-	if (keyBinds.rotateClockwise.includes(currentKey)) {
-		tetrisStore.dispatch("ROTATE-CLOCKWISE");
-	}
-
-	if (keyBinds.rotateAntiClockwise.includes(currentKey)) {
-		tetrisStore.dispatch("ROTATE-ANTICLOCKWISE");
-	}
-
-	if (keyBinds.softDrop.includes(currentKey)) {
-		tetrisStore.dispatch("SOFT-DROP");
-	}
-
-	if (keyBinds.hardDrop.includes(currentKey)) {
-		tetrisStore.dispatch("HARD-DROP");
-	}
-
-	if (keyBinds.hold.includes(currentKey)) {
-		tetrisStore.dispatch("HOLD");
-	}
-
-	if (keyBinds.reset.includes(currentKey)) {
-		tetrisStore.dispatch("RESET");
-	}
-
-	if (keyBinds.pause.includes(currentKey)) {
-		tetrisStore.dispatch("PAUSE");
-	}
-
-	tetrisStore.dispatch("EXIT-FAIL"); // any key press will attempt to leave the fail screen
-};
+keydown;
+keyup;
 
 main();

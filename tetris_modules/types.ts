@@ -84,6 +84,18 @@ export type Settings = {
 	randomChoice: randomSystem;
 	keyBindings: KeyBinding;
 	dropShadow: boolean;
+	autoRepeat: AutoRepeatSettings;
+};
+
+/**
+ * The repeat delay in milliseconds is the pause between pressing a key and when it starts repeating.
+ *
+ * The repeat rate in milliseconds is the speed at which it repeats.
+ */
+
+export type AutoRepeatSettings = {
+	delayMS: number;
+	rateMS: number;
 };
 
 export type Input = {

@@ -1,40 +1,9 @@
-import { Settings } from "./types";
 import { newGameBoard } from "./collision";
 import { GameState, Piece } from "./types";
 import { random7Bag, randomPiece } from "./random";
 import { subtract, add } from "./complex";
 import { cloneDeep } from "lodash";
-
-export const tomKEYBINDINGS = {
-	left: [85],
-	right: [48],
-	rotateClockwise: [70],
-	rotateAntiClockwise: [83],
-	softDrop: [57],
-	hardDrop: [32],
-	hold: [68],
-	reset: [82],
-	pause: [27]
-}; // the best keybindings
-
-export const KEYBINDINGS = {
-	left: [37],
-	right: [39],
-	rotateClockwise: [88, 38],
-	rotateAntiClockwise: [17, 90],
-	softDrop: [40],
-	hardDrop: [32],
-	hold: [67, 16],
-	reset: [82],
-	pause: [27]
-}; // lame bad keybindings for beta children
-
-export const DEFAULTSETTINGS: Settings = {
-	holdActive: true,
-	randomChoice: "7-BAG",
-	keyBindings: KEYBINDINGS,
-	dropShadow: true
-}; // default settings
+import { DEFAULTSETTINGS } from "./SETTINGS";
 
 export const CELL = {
 	EMPTY: 0,
@@ -163,22 +132,6 @@ export const PIECES: Piece[] = [
 ]; // a scrambleable list of all the pieces
 
 export const STARTINGPOS = { x: 4, y: -1 }; // the starting displacement of the pieces
-
-export const FAILSCREENMESSAGES = [
-	"YOU ARE DIE",
-	"WOW THAT SUCKED!",
-	"BRUH",
-	"BOB COULDN'T FIX IT",
-	"CATASTROPHIC",
-	"THAT WAS QUICK",
-	"WHAT THE DUCK!",
-	"BETTER DUCK NEXT TIME",
-	"K.O.",
-	"FATALITY",
-	"F",
-	"BETA GAMER",
-	"JUST QUIT ALREADY"
-]; // a lil cheeky cheeky
 
 // returns a cleared gameState but retains the high score
 export const resetGameState = (HighScore: number): GameState => {
