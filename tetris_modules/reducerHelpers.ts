@@ -18,18 +18,18 @@ export const right: Transformation = add({ x: 1, y: 0 });
 export const rotatePieceClockwise = (piece: Piece): Piece => ({
 	...piece,
 	shape: piece.shape.map(rotateClockwise),
-	rotationState: (piece.rotationState + 1) % 4 // updates piece
+	rotationState: (piece.rotationState + 1) % 4 // updates piece rotation state
 });
 export const rotatePieceAntiClockwise = (piece: Piece): Piece => ({
 	...piece,
 	shape: piece.shape.map(rotateAntiClockwise),
-	rotationState: (piece.rotationState + 3) % 4
+	rotationState: (piece.rotationState + 3) % 4 // updates piece rotation state
 });
 
 export const rotatePiece180 = (piece: Piece): Piece => ({
 	...piece,
 	shape: piece.shape.map(rotate180),
-	rotationState: (piece.rotationState + 2) % 4
+	rotationState: (piece.rotationState + 2) % 4 // updates piece rotation state
 });
 
 export const resetPieceRotation = (piece: Piece): Piece => {

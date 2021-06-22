@@ -241,7 +241,7 @@ window.requestAnimationFrame(loop);
 // Key Press Input
 document.onkeydown = e => {
 	const keyBinds = tetrisStore.state.settings.keyBindings; // sets the keybindings to the states current keybindings
-	const currentKey = e.which; // more meaninful name
+	const currentKey = e.which; // more meaningful name
 
 	if (keyBinds.left.includes(currentKey)) {
 		tetrisStore.dispatch("MOVE-LEFT");
