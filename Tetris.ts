@@ -31,6 +31,7 @@ import {
 } from "./tetris_modules/tetrisListeners";
 import { keydown, keyup } from "./tetris_modules/keyhandling";
 import { FAILSCREENMESSAGES } from "./tetris_modules/SETTINGS";
+import { randomMessage } from "./tetris_modules/random";
 
 // all possible edits to the game state (GameActions)
 type GameAction =
@@ -106,12 +107,7 @@ const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 			if (state.paused || state.fail) return state; // returns state if paused or failed
 			const newState = { ...state, pos: down(state.pos) };
 			if (pieceCollided(newState)) {
-				if (failed(newState)) {
-					return state.score > state.highScore
-						? resetGameState(state.score) // if new highscore the game will keep that high score
-						: resetGameState(state.highScore); // if not it remains the same
-				}
-				return { ...settlePiece(state), holdFresh: true }; // refreshsens
+				return state;
 			}
 			return newState;
 		}
@@ -173,10 +169,7 @@ const tetrisReducer = (state: GameState, action: GameAction): GameState => {
 					? {
 							...state,
 							tick: 0, // resets tick timer
-							failMessage:
-								FAILSCREENMESSAGES[
-									Math.floor(Math.random() * FAILSCREENMESSAGES.length)
-								] // changes the fail screen message to a random message from the FAILSCREENMESSAGES array
+							failMessage: randomMessage() // changes the fail screen message to a random message from the FAILSCREENMESSAGES array
 					  }
 					: { ...state, tick: state.tick + 1 }; // otherwise increases the tick
 			}
