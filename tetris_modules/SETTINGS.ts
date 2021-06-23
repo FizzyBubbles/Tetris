@@ -26,13 +26,13 @@ export const KEYBINDINGS = {
 
 export const defaultARR: AutoRepeatSettings = {
 	rateMS: 75,
-	delayMS: 150
+	delayMS: 100
 };
 
 export const DEFAULTSETTINGS: Settings = {
 	holdActive: true, // doesn't do anything yet
 	randomChoice: "7-BAG", // doesn't do anything yet
-	keyBindings: tomKEYBINDINGS,
+	keyBindings: KEYBINDINGS,
 	dropShadow: true,
 	autoRepeat: defaultARR
 }; // default settings
