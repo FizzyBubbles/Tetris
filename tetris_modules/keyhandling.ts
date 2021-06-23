@@ -136,7 +136,7 @@ export const keyup = (document.onkeyup = e => {
 		currentKeyDown.hardDrop = false;
 	}
 
-	if (keyBinds.hold.includes(currentKey) && !currentKeyDown.hold) {
+	if (keyBinds.hold.includes(currentKey) && currentKeyDown.hold) {
 		currentKeyDown.hold = false;
 	}
 
